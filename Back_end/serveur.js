@@ -6,7 +6,6 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const http = require('http');
 const socketIo = require('socket.io');
-const path = require('path');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -64,13 +63,10 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Configuration MongoDB (mise à jour)
+// Configuration MongoDB
 const mongoOptions = {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
   retryWrites: true,
   w: 'majority'
-  // Suppression des options ssl et sslValidate obsolètes
 };
 
 mongoose.connect(process.env.MONGO_URI, mongoOptions)
@@ -86,7 +82,7 @@ mongoose.connect(process.env.MONGO_URI, mongoOptions)
 // Configuration des sessions
 app.use(session({
   name: 'kankadi.sid',
-  secret: process.env.SESSION_SECRET || 'fallback-secret-123', // Valeur par défaut pour le développement
+  secret: process.env.SESSION_SECRET || 'fallback-secret-123',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
@@ -141,31 +137,26 @@ app.use("/api/classes", routesClasse);
 app.use("/api/matieres", routesMatiere);
 app.use('/api/notes', noteRoutes);
 
+// Route racine
+app.get('/', (req, res) => {
+  res.json({
+    status: 'success',
+    message: 'Backend Kankadi Internationale en marche',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV,
+    dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+  });
+});
+
 // Route de santé
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'healthy',
     dbState: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV,
+    uptime: process.uptime()
   });
 });
-
-// Servir les fichiers statiques en production
-if (isProduction) {
-  app.use(express.static(path.join(__dirname, 'public'), {
-    maxAge: '1y',
-    immutable: true,
-    setHeaders: (res, path) => {
-      if (path.endsWith('.html')) {
-        res.setHeader('Cache-Control', 'no-cache');
-      }
-    }
-  }));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-  });
-}
 
 // Gestion des erreurs
 app.use((req, res, next) => {
