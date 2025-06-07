@@ -30,6 +30,11 @@ const server = http.createServer(app);
 const isProduction = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || 5000;
 
+// Vérification des variables d'environnement
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('MONGO_URI:', process.env.MONGO_URI ? 'présent' : 'manquant');
+console.log('FRONTEND_PROD_URL:', process.env.FRONTEND_PROD_URL || 'non défini');
+
 // Middlewares de sécurité
 app.use(helmet());
 app.use(compression());
@@ -59,18 +64,20 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Configuration MongoDB
+// Configuration MongoDB (mise à jour)
 const mongoOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   retryWrites: true,
-  w: 'majority',
-  ssl: true,
-  sslValidate: true
+  w: 'majority'
+  // Suppression des options ssl et sslValidate obsolètes
 };
 
 mongoose.connect(process.env.MONGO_URI, mongoOptions)
-  .then(() => console.log("✅ Connecté à MongoDB Atlas"))
+  .then(() => {
+    console.log("✅ Connecté à MongoDB Atlas");
+    console.log("Host MongoDB:", mongoose.connection.host);
+  })
   .catch(err => {
     console.error("❌ Erreur de connexion MongoDB:", err);
     process.exit(1);
@@ -79,13 +86,13 @@ mongoose.connect(process.env.MONGO_URI, mongoOptions)
 // Configuration des sessions
 app.use(session({
   name: 'kankadi.sid',
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'fallback-secret-123', // Valeur par défaut pour le développement
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     crypto: {
-      secret: process.env.STORE_SECRET
+      secret: process.env.STORE_SECRET || 'fallback-store-secret-456'
     },
     ttl: 86400
   }),
@@ -116,7 +123,6 @@ io.on('connection', (socket) => {
     console.log(`Déconnexion Socket.IO: ${socket.id}`);
   });
 
-  // Gestion des événements personnalisés
   socket.on('joinRoom', (room) => {
     socket.join(room);
     console.log(`Socket ${socket.id} a rejoint la room ${room}`);
@@ -134,6 +140,15 @@ app.use("/api/candidatures", routesCandidature);
 app.use("/api/classes", routesClasse);
 app.use("/api/matieres", routesMatiere);
 app.use('/api/notes', noteRoutes);
+
+// Route de santé
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    dbState: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    environment: process.env.NODE_ENV
+  });
+});
 
 // Servir les fichiers statiques en production
 if (isProduction) {
@@ -171,7 +186,7 @@ server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
   console.log(`Mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPPEMENT'}`);
   console.log(`Origines autorisées: ${allowedOrigins.join(', ')}`);
-  console.log(`URL MongoDB: ${mongoose.connection.host}`);
+  console.log(`URL MongoDB: ${mongoose.connection.host || 'Non connecté'}`);
 });
 
 // Gestion des erreurs non catchées
