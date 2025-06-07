@@ -16,7 +16,7 @@ const ListeEnseignant = () => {
     setLoading(true);
     const token = localStorage.getItem('token'); // Récupération du token
     try {
-      const response = await axios.get('http://localhost:5000/api/enseignants/listes', {
+      const response = await axios.get('https://mes-sites.onrender.com/api/enseignants/listes', {
         headers: { Authorization: `Bearer ${token}` }, // Ajout du token dans les en-têtes
       });
       setEnseignants(response.data);
@@ -34,7 +34,7 @@ const ListeEnseignant = () => {
     console.log('ID à supprimer:', id);
     if (id && window.confirm('Voulez-vous vraiment supprimer cet enseignant ?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/enseignants/${id}`, {
+        await axios.delete(`https://mes-sites.onrender.com/api/enseignants/${id}`, {
           headers: { Authorization: `Bearer ${token}` }, // Ajout du token ici
         });
         setEnseignants(enseignants.filter((enseignant) => enseignant._id !== id)); // Utiliser _id pour filtrer

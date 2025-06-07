@@ -91,10 +91,10 @@ const Note = () => {
       setError("");
       
       // Fetch data sequentially for better error tracking
-      const notesRes = await axios.get("http://localhost:5000/api/notes");
-      const elevesRes = await axios.get("http://localhost:5000/api/eleves");
-      const matieresRes = await axios.get("http://localhost:5000/api/matieres");
-      const enseignantsRes = await axios.get("http://localhost:5000/api/enseignants/listes");
+      const notesRes = await axios.get("https://mes-sites.onrender.com/api/notes");
+      const elevesRes = await axios.get("https://mes-sites.onrender.com/api/eleves");
+      const matieresRes = await axios.get("https://mes-sites.onrender.com/api/matieres");
+      const enseignantsRes = await axios.get("https://mes-sites.onrender.com/api/enseignants/listes");
       
       // Validate response data
       if (!notesRes.data || !elevesRes.data || !matieresRes.data || !enseignantsRes.data) {

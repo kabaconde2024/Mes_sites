@@ -49,7 +49,7 @@ const CreerMatiere = () => {
     const fetchEnseignants = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('http://localhost:5000/api/enseignants/listes', {
+        const response = await axios.get('https://mes-sites.onrender.com/api/enseignants/listes', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -106,7 +106,7 @@ const CreerMatiere = () => {
         return navigate('/connexion');
       }
   
-      const response = await axios.post('http://localhost:5000/api/matieres', {
+      const response = await axios.post('https://mes-sites.onrender.com/api/matieres', {
         nom: formData.nom,
         description: formData.description,
         coefficient: formData.coefficient,

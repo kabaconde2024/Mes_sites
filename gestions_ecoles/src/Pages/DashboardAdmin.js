@@ -38,10 +38,10 @@ const DashboardAdmin = () => {
   const [error, setError] = useState(null);
 
   const API_URLS = {
-    eleves: "http://localhost:5000/api/eleves",
-    enseignants: "http://localhost:5000/api/enseignants/listes",
+    eleves: "https://mes-sites.onrender.com/api/eleves",
+    enseignants: "https://mes-sites.onrender.com/api/enseignants/listes",
     notes: "http://localhost:5000/api/notes",
-    matieres: "http://localhost:5000/api/matieres"
+    matieres: "https://mes-sites.onrender.com/api/matieres"
   };
 
   const fetchAllData = async () => {

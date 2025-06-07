@@ -55,14 +55,14 @@ const CreerClasse = () => {
       try {
         setLoading(prev => ({ ...prev, enseignants: true, matieres: true }));
         
-        const enseignantsResponse = await axios.get('http://localhost:5000/api/enseignants/listes', {
+        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/enseignants/listes', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
         setEnseignants(enseignantsResponse.data);
 
-        const matieresResponse = await axios.get('http://localhost:5000/api/matieres', {
+        const matieresResponse = await axios.get('https://mes-sites.onrender.com/api/matieres', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -143,7 +143,7 @@ const handleSubmit = async (e) => {
       }))
     };
 
-    const response = await axios.post('http://localhost:5000/api/classes', dataToSend, {
+    const response = await axios.post('https://mes-sites.onrender.com/api/classes', dataToSend, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('token')}`,
         'Content-Type': 'application/json'

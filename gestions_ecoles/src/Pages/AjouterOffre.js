@@ -22,7 +22,7 @@ const AjouterOffre = () => {
         const token = localStorage.getItem('token'); // Récupération du token  
 
         try {  
-            await axios.post('http://localhost:5000/api/offres/ajout', { titre, description }, {  
+            await axios.post('https://mes-sites.onrender.com/api/offres/ajout', { titre, description }, {  
                 headers: { Authorization: `Bearer ${token}` }, // Ajout du token dans les en-têtes  
             });  
             setTitre(''); // Réinitialiser le champ de titre  

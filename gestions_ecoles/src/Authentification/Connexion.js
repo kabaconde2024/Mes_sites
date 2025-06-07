@@ -13,7 +13,7 @@ const Connexion = () => {
     e.preventDefault();
 
     // Envoi des données au backend via Axios
-    axios.post('http://localhost:5000/api/auth/connexion', { email, motDePasse })
+    axios.post('https://mes-sites.onrender.com/api/auth/connexion', { email, motDePasse })
     .then((response) => {
       // Si la connexion est réussie
       console.log("Connexion réussie !", response.data);
