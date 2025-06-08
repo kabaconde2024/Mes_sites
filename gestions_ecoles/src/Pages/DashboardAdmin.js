@@ -40,7 +40,7 @@ const DashboardAdmin = () => {
   const API_URLS = {
     eleves: "https://mes-sites.onrender.com/api/eleves",
     enseignants: "https://mes-sites.onrender.com/api/enseignants/listes",
-    notes: "http://localhost:5000/api/notes",
+    notes: "https://mes-sites.onrender.com/api/notes",
     matieres: "https://mes-sites.onrender.com/api/matieres"
   };
 
