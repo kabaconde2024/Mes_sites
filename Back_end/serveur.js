@@ -9,7 +9,6 @@ const socketIo = require('socket.io');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
-const morgan = require('morgan');
 
 // Import des routes
 const enseignantRoutes = require("./routes/routesEnseignant");
@@ -30,138 +29,91 @@ const server = http.createServer(app);
 const isProduction = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || 5000;
 
-// Middleware de logging
-app.use(morgan(isProduction ? 'combined' : 'dev'));
+// Middleware de logging simplifié (remplace morgan)
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.path}`);
+  next();
+});
 
-// Vérification des variables d'environnement critiques
+// Vérification des variables d'environnement
 if (!process.env.MONGO_URI) {
-  console.error('❌ Variable MONGO_URI manquante');
+  console.error('❌ MONGO_URI est requis');
   process.exit(1);
 }
 
-if (!process.env.SESSION_SECRET && isProduction) {
-  console.error('❌ Variable SESSION_SECRET manquante en production');
+if (isProduction && !process.env.SESSION_SECRET) {
+  console.error('❌ SESSION_SECRET est requis en production');
   process.exit(1);
 }
 
 // Middlewares de sécurité
-app.use(helmet({
-  contentSecurityPolicy: isProduction ? {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      imgSrc: ["'self'", "data:"],
-      connectSrc: ["'self'"],
-      fontSrc: ["'self'"],
-      objectSrc: ["'none'"]
-    }
-  } : false
-}));
-
+app.use(helmet());
 app.use(compression());
 app.disable('x-powered-by');
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Configuration CORS améliorée
+// Configuration CORS
 const allowedOrigins = isProduction
   ? [
       'https://mes-sites-2.onrender.com',
       'https://mes-sites.onrender.com',
       process.env.FRONTEND_PROD_URL
     ].filter(Boolean)
-  : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000'];
-
-console.log('Origines autorisées:', allowedOrigins);
+  : ['http://localhost:3000', 'http://localhost:5000'];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin) {
-      // Autoriser les requêtes sans origine (comme les apps mobiles ou Postman) en développement
-      if (!isProduction) return callback(null, true);
-      return callback(new Error('Origin required in production'), false);
-    }
-
-    const originIsAllowed = allowedOrigins.some(allowedOrigin => 
-      origin === allowedOrigin || 
-      origin.replace(/^https?:\/\//, '') === allowedOrigin.replace(/^https?:\/\//, '')
-    );
-
-    if (originIsAllowed) {
-      callback(null, true);
-    } else {
-      console.error('Origin non autorisé:', origin);
-      callback(new Error('Not allowed by CORS'));
-    }
+    if (!origin && !isProduction) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    
+    console.warn('Origin non autorisé:', origin);
+    callback(new Error('Not allowed by CORS'));
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  credentials: true,
-  maxAge: 86400
+  credentials: true
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
 
 // Rate Limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100,
-  standardHeaders: true,
-  legacyHeaders: false
+  max: 100
 });
 app.use(limiter);
 
-// Configuration MongoDB
-const mongoOptions = {
+// Connexion MongoDB
+mongoose.connect(process.env.MONGO_URI, {
   retryWrites: true,
-  w: 'majority',
-  serverSelectionTimeoutMS: 5000,
-  connectTimeoutMS: 10000
-};
+  w: 'majority'
+})
+.then(() => console.log('✅ Connecté à MongoDB'))
+.catch(err => {
+  console.error('❌ Erreur MongoDB:', err);
+  process.exit(1);
+});
 
-mongoose.connect(process.env.MONGO_URI, mongoOptions)
-  .then(() => {
-    console.log("✅ Connecté à MongoDB Atlas");
-    console.log("Host MongoDB:", mongoose.connection.host);
-  })
-  .catch(err => {
-    console.error("❌ Erreur de connexion MongoDB:", err);
-    process.exit(1);
-  });
-
-// Configuration des sessions
+// Session
 app.use(session({
-  name: 'kankadi.sid',
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGO_URI,
-    crypto: {
-      secret: process.env.STORE_SECRET || 'dev-store-secret'
-    },
-    ttl: 86400
-  }),
+  store: MongoStore.create({ mongoUrl: process.env.MONGO_URI }),
   cookie: {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
-    maxAge: 86400000,
-    domain: isProduction ? '.render.com' : undefined
+    maxAge: 86400000
   }
 }));
 
-// Configuration Socket.IO
+// Socket.IO
 const io = socketIo(server, {
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true
-  },
-  transports: ['websocket', 'polling'],
-  allowEIO3: true
+  }
 });
 
 // Routes
@@ -178,34 +130,11 @@ app.use("/api/notes", noteRoutes);
 
 // Gestion des erreurs
 app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Erreur interne du serveur' });
+  console.error(err);
+  res.status(500).json({ error: err.message });
 });
 
-// Gestion des routes non trouvées
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route non trouvée' });
-});
-
-// Démarrage du serveur
+// Démarrer le serveur
 server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-  console.log(`Mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPPEMENT'}`);
-});
-
-// Gestion propre des arrêts
-process.on('SIGTERM', () => {
-  console.log('SIGTERM reçu. Arrêt du serveur...');
-  server.close(() => {
-    console.log('Serveur arrêté');
-    process.exit(0);
-  });
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT reçu. Arrêt du serveur...');
-  server.close(() => {
-    console.log('Serveur arrêté');
-    process.exit(0);
-  });
 });
