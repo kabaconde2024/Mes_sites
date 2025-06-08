@@ -44,6 +44,41 @@ const DashboardAdmin = () => {
     matieres: "https://mes-sites.onrender.com/api/matieres"
   };
 
+
+  // Utilisez ce code à la place de votre appel direct à ipapi.co
+async function fetchIPData() {
+  try {
+    // Solution avec proxy CORS public
+    const response = await fetch('https://cors-anywhere.herokuapp.com/https://ipapi.co/json/');
+    
+    // Alternative si le proxy public est saturé
+    // const response = await fetch('https://ipwho.is/');
+    
+    const data = await response.json();
+    console.log("Données IP:", data);
+    return data;
+  } catch (error) {
+    console.error("Erreur de récupération des données IP:", error);
+    
+    // Fallback avec JSONP si tout échoue
+    return new Promise((resolve) => {
+      window.handleIPData = (data) => {
+        delete window.handleIPData;
+        resolve(data);
+      };
+      const script = document.createElement('script');
+      script.src = 'https://ipapi.co/json/?callback=handleIPData';
+      document.body.appendChild(script);
+    });
+  }
+}
+
+// Utilisation exemple
+fetchIPData().then(data => {
+  // Utilisez les données ici
+  console.log("Pays:", data.country_name);
+  console.log("Ville:", data.city);
+});
   const fetchAllData = async () => {
     try {
       setLoading(true);
