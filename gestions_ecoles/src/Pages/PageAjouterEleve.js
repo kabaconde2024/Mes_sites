@@ -61,7 +61,7 @@ const PageAjouterEleve = () => {
       try {
         setLoadingClasses(true);
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/classes', {
+        const response = await axios.get('https://mes-sites.onrender.com/api/classes', {
           headers: { Authorization: `Bearer ${token}` }
         });
         
@@ -125,7 +125,7 @@ const PageAjouterEleve = () => {
       };
 
       const response = await axios.post(
-        'http://localhost:5000/api/eleves/ajout', 
+        'https://mes-sites.onrender.com/api/eleves/ajout', 
         dataToSend,
         {
           headers: { 
