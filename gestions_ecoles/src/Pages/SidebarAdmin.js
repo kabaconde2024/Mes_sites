@@ -1,4 +1,15 @@
-import { Drawer, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
+import { 
+  Drawer, 
+  List, 
+  ListItem, 
+  ListItemText, 
+  Box, 
+  useMediaQuery, 
+  useTheme,
+  Typography,
+  IconButton,
+  Divider
+} from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
@@ -7,203 +18,175 @@ import AddTeacherIcon from '@mui/icons-material/PersonAddAlt1';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import PaymentIcon from '@mui/icons-material/Payment';
 import ListAltIcon from '@mui/icons-material/ListAlt';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import { useState } from 'react';
 
 const SidebarAdmin = () => {
-
-
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [open, setOpen] = useState(!isMobile);
+
+  const handleDrawerToggle = () => {
+    setOpen(!open);
+  };
+
+  const drawerWidth = 240;
+
+  const menuItems = [
+    { icon: <DashboardIcon />, text: "Dashboard", path: "/dashboardAdmin" },
+    { icon: <PersonAddIcon />, text: "Ajouter Élève", path: "/ajouterEleve" },
+    { icon: <PeopleIcon />, text: "Liste des Élèves", path: "/listeEleve" },
+    { icon: <AddTeacherIcon />, text: "Ajouter Enseignant", path: "/ajouterEnseignant" },
+    { icon: <PeopleIcon />, text: "Liste des Enseignants", path: "/ListeEnseignant" },
+    { icon: <PeopleIcon />, text: "Créer une Classe", path: "/CreerClasse" },
+    { icon: <PeopleIcon />, text: "Créer une Matière", path: "/CreerMatiere" },
+    { icon: <ScheduleIcon />, text: "Emploi du Temps", path: "/EmploiEleve" },
+    { icon: <PaymentIcon />, text: "Gestion des Paiements", path: "/Paiement" },
+    { icon: <ListAltIcon />, text: "Liste des Paiements", path: "/ListePaiement" },
+    { icon: <ListAltIcon />, text: "Note", path: "/Note" }
+  ];
 
   return (
-    <Drawer
-      sx={{
-        width: 240,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-          width: 240,
-          boxSizing: 'border-box',
-          backgroundColor: '#444444',
-          color: '#fff',
-          position: 'fixed',
-          height: 'calc(100vh - 64px)',
-          top: '64px'
-        },
-      }}
-      variant="permanent"
-      anchor="left"
-    >
-      <Box sx={{ padding: 2 }}>
-   
-      </Box>
-      <List>
-        {/* Dashboard */}
-        <ListItem
-          button
-          onClick={() => navigate("/dashboardAdmin")}
-          sx={{
+    <>
+      {isMobile && (
+        <IconButton
+          color="inherit"
+          aria-label="open drawer"
+          edge="start"
+          onClick={handleDrawerToggle}
+          sx={{ 
+            position: 'fixed',
+            left: 10,
+            top: 70,
+            zIndex: theme.zIndex.drawer + 1,
+            backgroundColor: '#444444',
+            color: '#d7c797',
             '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
+              backgroundColor: '#555555'
+            }
           }}
         >
-          <DashboardIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-
-        {/* Élèves */}
-        <ListItem
-          button
-          onClick={() => navigate("/ajouterEleve")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
+          <MenuIcon />
+        </IconButton>
+      )}
+      
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+            backgroundColor: '#444444',
+            color: '#fff',
+            height: isMobile ? '100vh' : 'calc(100vh - 64px)',
+            top: isMobile ? 0 : '64px',
+            transition: theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.enteringScreen,
+            }),
+            ...(!open && {
+              overflowX: 'hidden',
+              transition: theme.transitions.create('width', {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.leavingScreen,
+              }),
+              width: 0,
+              [theme.breakpoints.up('sm')]: {
+                width: theme.spacing(9),
+              },
+            }),
+          },
+        }}
+        variant={isMobile ? 'temporary' : 'permanent'}
+        anchor="left"
+        open={open}
+        onClose={handleDrawerToggle}
+      >
+        {isMobile && (
+          <Box 
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'flex-end',
+              padding: theme.spacing(0, 1),
+              ...theme.mixins.toolbar,
+            }}
+          >
+            <IconButton onClick={handleDrawerToggle}>
+              <ChevronLeftIcon sx={{ color: '#d7c797' }} />
+            </IconButton>
+          </Box>
+        )}
+        
+        <Box 
+          sx={{ 
+            padding: 2,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
           }}
         >
-          <PersonAddIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Ajouter Élève" />
-        </ListItem>
-
-        <ListItem
-          button
-          onClick={() => navigate("/listeEleve")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
+          <Typography 
+            variant="h6" 
+            noWrap 
+            component="div"
+            sx={{
               color: '#d7c797',
-            },
-          }}
-        >
-          <PeopleIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Liste des Élèves" />
-        </ListItem>
-
-        {/* Enseignants */}
-        <ListItem
-          button
-          onClick={() => navigate("/ajouterEnseignant")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <AddTeacherIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Ajouter Enseignant" />
-        </ListItem>
-
-        <ListItem
-          button
-          onClick={() => navigate("/ListeEnseignant")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <PeopleIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Liste des Enseignants" />
-        </ListItem>
-
-        {/* Gestion scolaire */}
-        <ListItem
-          button
-          onClick={() => navigate("/CreerClasse")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <PeopleIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Créer une Classe" />
-        </ListItem>
-
-        <ListItem
-          button
-          onClick={() => navigate("/CreerMatiere")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <PeopleIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Créer une Matière" />
-        </ListItem>
-
-        {/* Emploi du temps */}
-        <ListItem
-          button
-          onClick={() => navigate("/EmploiEleve")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <ScheduleIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Emploi du Temps" />
-        </ListItem>
-
-        {/* Paiements */}
-        <ListItem
-          button
-          onClick={() => navigate("/Paiement")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <PaymentIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-
-          <ListItemText primary="Gestion des Paiements" />
-        </ListItem>
-
-        <ListItem
-          button
-          onClick={() => navigate("/ListePaiement")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <ListAltIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Liste des Paiements" />
-        </ListItem>
-
-
-        <ListItem
-          button
-          onClick={() => navigate("/Note")}
-          sx={{
-            '&:hover': {
-              backgroundColor: '#FFFFFF',
-              color: '#d7c797',
-            },
-          }}
-        >
-          <ListAltIcon sx={{ marginRight: 1, color: '#d7c797' }} />
-          <ListItemText primary="Note" />
-        </ListItem>
-
-
-        {/* Offres et candidatures */}
-       
-
-       
-      </List>
-    </Drawer>
+              fontWeight: 'bold',
+              textAlign: 'center',
+              mb: 2
+            }}
+          >
+            Menu Admin
+          </Typography>
+          <Divider sx={{ width: '80%', bgcolor: '#d7c797', mb: 2 }} />
+        </Box>
+        
+        <List>
+          {menuItems.map((item, index) => (
+            <ListItem
+              key={index}
+              button
+              onClick={() => {
+                navigate(item.path);
+                if (isMobile) setOpen(false);
+              }}
+              sx={{
+                '&:hover': {
+                  backgroundColor: '#FFFFFF',
+                  color: '#d7c797',
+                },
+                py: isMobile ? 1.5 : 1,
+                px: 2
+              }}
+            >
+              <Box sx={{ 
+                color: '#d7c797',
+                minWidth: 40,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                {item.icon}
+              </Box>
+              <ListItemText 
+                primary={item.text} 
+                primaryTypographyProps={{
+                  sx: {
+                    fontWeight: 'medium',
+                    fontSize: isMobile ? '0.9rem' : '1rem'
+                  }
+                }} 
+              />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
+    </>
   );
 };
 

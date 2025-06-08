@@ -15,7 +15,9 @@ import {
   Tabs,
   Chip,
   Alert,
-  Button
+  Button,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   School as SchoolIcon,
@@ -37,14 +39,16 @@ const DashboardAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+
   const API_URLS = {
     eleves: "https://mes-sites.onrender.com/api/eleves",
     enseignants: "https://mes-sites.onrender.com/api/enseignants/listes",
     notes: "https://mes-sites.onrender.com/api/notes",
     matieres: "https://mes-sites.onrender.com/api/matieres"
   };
-
-
 
   const fetchAllData = async () => {
     try {
@@ -96,12 +100,26 @@ const DashboardAdmin = () => {
     );
 
     return (
-      <TableContainer component={Paper} sx={{ mt: 2, boxShadow: 3 }}>
-        <Table sx={{ minWidth: 650 }}>
+      <TableContainer 
+        component={Paper} 
+        sx={{ 
+          mt: 2, 
+          boxShadow: 3,
+          maxWidth: '100%',
+          overflowX: 'auto'
+        }}
+      >
+        <Table sx={{ minWidth: isMobile ? 300 : 650 }}>
           <TableHead sx={{ bgcolor: 'background.paper' }}>
             <TableRow>
               {columns.map((col) => (
-                <TableCell key={col.field} sx={{ fontWeight: 'bold' }}>
+                <TableCell 
+                  key={col.field} 
+                  sx={{ 
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
                   {col.headerName}
                 </TableCell>
               ))}
@@ -111,7 +129,15 @@ const DashboardAdmin = () => {
             {data.map((row) => (
               <TableRow key={row._id} hover>
                 {columns.map((col) => (
-                  <TableCell key={`${row._id}-${col.field}`}>
+                  <TableCell 
+                    key={`${row._id}-${col.field}`}
+                    sx={{
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      maxWidth: isMobile ? '150px' : 'none'
+                    }}
+                  >
                     {col.valueGetter ? col.valueGetter(row) : row[col.field]}
                   </TableCell>
                 ))}
@@ -127,36 +153,62 @@ const DashboardAdmin = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
       
-      <Box sx={{ display: 'flex', flex: 1, pt: '64px', height: 'calc(100vh - 64px)' }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flex: 1, 
+        pt: { xs: '56px', sm: '64px' }, 
+        height: { xs: 'calc(100vh - 56px)', sm: 'calc(100vh - 64px)' } 
+      }}>
         <SidebarAdmin />
         
         <Box component="main" sx={{ 
           flexGrow: 1, 
-          p: 3,
+          p: { xs: 1, sm: 3 },
           ml: { sm: '240px' },
           width: { sm: 'calc(100% - 240px)' },
           overflowY: 'auto'
         }}>
-          <Typography variant="h4" sx={{ mb: 4, fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+          <Typography variant={isMobile ? 'h5' : 'h4'} sx={{ 
+            mb: { xs: 2, sm: 4 }, 
+            fontWeight: 'bold', 
+            display: 'flex', 
+            alignItems: 'center' 
+          }}>
             <SchoolIcon sx={{ mr: 1 }} />
             Tableau de bord
           </Typography>
 
-          <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 3 }}>
-            <Tab label="Élèves" icon={<PeopleIcon />} />
-            <Tab label="Enseignants" icon={<PeopleIcon />} />
-            <Tab label="Matières" icon={<SubjectIcon />} />
-            <Tab label="Notes" icon={<AssignmentIcon />} />
+          <Tabs 
+            value={tabValue} 
+            onChange={handleTabChange} 
+            sx={{ mb: 3 }}
+            variant={isMobile ? 'scrollable' : 'standard'}
+            scrollButtons="auto"
+            allowScrollButtonsMobile
+          >
+            <Tab label={isMobile ? "Élèves" : "Liste des Élèves"} icon={<PeopleIcon />} />
+            <Tab label={isMobile ? "Enseignants" : "Liste des Enseignants"} icon={<PeopleIcon />} />
+            <Tab label={isMobile ? "Matières" : "Liste des Matières"} icon={<SubjectIcon />} />
+            <Tab label={isMobile ? "Notes" : "Liste des Notes"} icon={<AssignmentIcon />} />
           </Tabs>
 
           <Divider sx={{ mb: 3 }} />
 
           {tabValue === 0 && (
             <Box>
-              <Typography variant="h5" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center',
+                flexWrap: 'wrap'
+              }}>
                 <PeopleIcon sx={{ mr: 1 }} />
                 Liste des Élèves
-                <Chip label={`${eleves.length} inscrits`} size="small" sx={{ ml: 2 }} />
+                <Chip 
+                  label={`${eleves.length} inscrits`} 
+                  size="small" 
+                  sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }} 
+                />
               </Typography>
               {renderTable(eleves, [
                 { field: 'nom', headerName: 'Nom' },
@@ -184,10 +236,19 @@ const DashboardAdmin = () => {
 
           {tabValue === 1 && (
             <Box>
-              <Typography variant="h5" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center',
+                flexWrap: 'wrap'
+              }}>
                 <PeopleIcon sx={{ mr: 1 }} />
                 Liste des Enseignants
-                <Chip label={`${enseignants.length} enseignants`} size="small" sx={{ ml: 2 }} />
+                <Chip 
+                  label={`${enseignants.length} enseignants`} 
+                  size="small" 
+                  sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }} 
+                />
               </Typography>
               {renderTable(enseignants, [
                 { field: 'nom', headerName: 'Nom' },
@@ -204,10 +265,19 @@ const DashboardAdmin = () => {
 
           {tabValue === 2 && (
             <Box>
-              <Typography variant="h5" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center',
+                flexWrap: 'wrap'
+              }}>
                 <SubjectIcon sx={{ mr: 1 }} />
                 Liste des Matières
-                <Chip label={`${matieres.length} matières`} size="small" sx={{ ml: 2 }} />
+                <Chip 
+                  label={`${matieres.length} matières`} 
+                  size="small" 
+                  sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }} 
+                />
               </Typography>
               {renderTable(matieres, [
                 { field: 'nom', headerName: 'Nom' },
@@ -226,10 +296,19 @@ const DashboardAdmin = () => {
 
           {tabValue === 3 && (
             <Box>
-              <Typography variant="h5" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+              <Typography variant={isMobile ? 'h6' : 'h5'} sx={{ 
+                mb: 2, 
+                display: 'flex', 
+                alignItems: 'center',
+                flexWrap: 'wrap'
+              }}>
                 <AssignmentIcon sx={{ mr: 1 }} />
                 Liste des Notes
-                <Chip label={`${notes.length} notes`} size="small" sx={{ ml: 2 }} />
+                <Chip 
+                  label={`${notes.length} notes`} 
+                  size="small" 
+                  sx={{ ml: { xs: 0, sm: 2 }, mt: { xs: 1, sm: 0 } }} 
+                />
               </Typography>
               {renderTable(notes, [
                 { 
