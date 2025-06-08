@@ -10,7 +10,6 @@ const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-// Import des routes
 const enseignantRoutes = require("./routes/routesEnseignant");
 const emploiDuTempsRoutes = require("./routes/routesEmploi");
 const routesAuth = require('./routes/routesAuth');
@@ -25,17 +24,14 @@ const noteRoutes = require('./routes/noteRoutes');
 const app = express();
 const server = http.createServer(app);
 
-// Configuration de base
 const isProduction = process.env.NODE_ENV === 'production';
-const PORT = process.env.PORT || 10000; // Modifié pour correspondre à votre port
+const PORT = process.env.PORT || 10000;
 
-// Middleware de logging simplifié (remplace morgan)
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - Origin: ${req.headers.origin}`);
   next();
 });
 
-// Vérification des variables d'environnement
 if (!process.env.MONGO_URI) {
   console.error('❌ MONGO_URI est requis');
   process.exit(1);
@@ -46,14 +42,12 @@ if (isProduction && !process.env.SESSION_SECRET) {
   process.exit(1);
 }
 
-// Middlewares de sécurité
 app.use(helmet());
 app.use(compression());
 app.disable('x-powered-by');
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Configuration CORS améliorée
 const allowedOrigins = isProduction
   ? [
       'https://mes-sites.onrender.com',
@@ -65,18 +59,16 @@ const allowedOrigins = isProduction
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Autoriser les requêtes sans origine en développement (Postman, etc.)
     if (!origin && !isProduction) return callback(null, true);
-    
-    // Autoriser toutes les sous-domaines .render.com en production
+
     if (isProduction && origin && (origin.endsWith('.render.com') || allowedOrigins.includes(origin))) {
       return callback(null, true);
     }
-    
+
     if (!isProduction && allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
-    
+
     console.warn('🚨 Origin non autorisé:', origin);
     callback(new Error('Not allowed by CORS'));
   },
@@ -86,11 +78,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-
-// Gestion des requêtes OPTIONS (pré-vol)
 app.options('*', cors(corsOptions));
 
-// Rate Limiter
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
@@ -98,7 +87,6 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Connexion MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   retryWrites: true,
   w: 'majority',
@@ -111,26 +99,24 @@ mongoose.connect(process.env.MONGO_URI, {
   process.exit(1);
 });
 
-// Configuration de session améliorée
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
-    ttl: 24 * 60 * 60 // 1 jour
+    ttl: 24 * 60 * 60
   }),
   cookie: {
     httpOnly: true,
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
-    domain: isProduction ? '.render.com' : undefined,
+    domain: isProduction ? '.onrender.com' : undefined,
     maxAge: 86400000,
     path: '/'
   }
 }));
 
-// Socket.IO configuration
 const io = socketIo(server, {
   cors: {
     origin: isProduction ? [
@@ -143,13 +129,11 @@ const io = socketIo(server, {
   allowEIO3: true
 });
 
-// Middleware pour ajouter io aux requêtes
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// Routes
 app.use("/api/enseignants", enseignantRoutes);
 app.use("/api/emplois", emploiDuTempsRoutes);
 app.use("/api/auth", routesAuth);
@@ -161,12 +145,10 @@ app.use("/api/classes", routesClasse);
 app.use("/api/matieres", routesMatiere);
 app.use("/api/notes", noteRoutes);
 
-// Route de santé
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK', timestamp: new Date() });
 });
 
-// Gestion des erreurs améliorée
 app.use((err, req, res, next) => {
   console.error('🔥 Error:', err.stack);
   res.status(err.status || 500).json({
@@ -177,14 +159,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Démarrer le serveur
 server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
   console.log(`🌍 Environnement: ${isProduction ? 'Production' : 'Développement'}`);
   console.log(`🔗 Origines autorisées: ${allowedOrigins.join(', ')}`);
 });
 
-// Gestion des erreurs non catchées
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'reason:', reason);
 });
