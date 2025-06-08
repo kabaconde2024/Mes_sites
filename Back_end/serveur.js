@@ -9,6 +9,7 @@ const socketIo = require('socket.io');
 const compression = require('compression');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const morgan = require('morgan');
 
 // Import des routes
 const enseignantRoutes = require("./routes/routesEnseignant");
@@ -29,37 +30,69 @@ const server = http.createServer(app);
 const isProduction = process.env.NODE_ENV === 'production';
 const PORT = process.env.PORT || 5000;
 
-// Vérification des variables d'environnement
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('MONGO_URI:', process.env.MONGO_URI ? 'présent' : 'manquant');
-console.log('FRONTEND_PROD_URL:', process.env.FRONTEND_PROD_URL || 'non défini');
+// Middleware de logging
+app.use(morgan(isProduction ? 'combined' : 'dev'));
+
+// Vérification des variables d'environnement critiques
+if (!process.env.MONGO_URI) {
+  console.error('❌ Variable MONGO_URI manquante');
+  process.exit(1);
+}
+
+if (!process.env.SESSION_SECRET && isProduction) {
+  console.error('❌ Variable SESSION_SECRET manquante en production');
+  process.exit(1);
+}
 
 // Middlewares de sécurité
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: isProduction ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
+      connectSrc: ["'self'"],
+      fontSrc: ["'self'"],
+      objectSrc: ["'none'"]
+    }
+  } : false
+}));
+
 app.use(compression());
 app.disable('x-powered-by');
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Configuration CORS mise à jour
+// Configuration CORS améliorée
 const allowedOrigins = isProduction
   ? [
       'https://mes-sites-2.onrender.com',
       'https://mes-sites.onrender.com',
       process.env.FRONTEND_PROD_URL
-    ].filter(Boolean) // Supprime les valeurs undefined
-  : ['http://localhost:3000'];
+    ].filter(Boolean)
+  : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:3000'];
+
+console.log('Origines autorisées:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin && isProduction) {
-      return callback(new Error('Origin non autorisé en production'), false);
+    if (!origin) {
+      // Autoriser les requêtes sans origine (comme les apps mobiles ou Postman) en développement
+      if (!isProduction) return callback(null, true);
+      return callback(new Error('Origin required in production'), false);
     }
-    
-    if (!origin || allowedOrigins.includes(origin)) {
+
+    const originIsAllowed = allowedOrigins.some(allowedOrigin => 
+      origin === allowedOrigin || 
+      origin.replace(/^https?:\/\//, '') === allowedOrigin.replace(/^https?:\/\//, '')
+    );
+
+    if (originIsAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Non autorisé par CORS'));
+      console.error('Origin non autorisé:', origin);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -69,7 +102,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // Préflight requests
+app.options('*', cors(corsOptions));
 
 // Rate Limiter
 const limiter = rateLimit({
@@ -83,7 +116,9 @@ app.use(limiter);
 // Configuration MongoDB
 const mongoOptions = {
   retryWrites: true,
-  w: 'majority'
+  w: 'majority',
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000
 };
 
 mongoose.connect(process.env.MONGO_URI, mongoOptions)
@@ -96,16 +131,16 @@ mongoose.connect(process.env.MONGO_URI, mongoOptions)
     process.exit(1);
   });
 
-// Configuration des sessions mise à jour
+// Configuration des sessions
 app.use(session({
   name: 'kankadi.sid',
-  secret: process.env.SESSION_SECRET || 'fallback-secret-123',
+  secret: process.env.SESSION_SECRET || 'dev-secret',
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     crypto: {
-      secret: process.env.STORE_SECRET || 'fallback-store-secret-456'
+      secret: process.env.STORE_SECRET || 'dev-store-secret'
     },
     ttl: 86400
   }),
@@ -125,94 +160,52 @@ const io = socketIo(server, {
     methods: ["GET", "POST"],
     credentials: true
   },
-  transports: ['websocket'],
+  transports: ['websocket', 'polling'],
   allowEIO3: true
 });
 
-io.on('connection', (socket) => {
-  console.log(`Nouvelle connexion Socket.IO: ${socket.id}`);
-  
-  socket.on('disconnect', () => {
-    console.log(`Déconnexion Socket.IO: ${socket.id}`);
-  });
-
-  socket.on('joinRoom', (room) => {
-    socket.join(room);
-    console.log(`Socket ${socket.id} a rejoint la room ${room}`);
-  });
-});
-
-// Routes API
-app.use('/api/auth', routesAuth);
-app.use('/api/eleves', routesEleve);
+// Routes
 app.use("/api/enseignants", enseignantRoutes);
-app.use("/api/emploi", emploiDuTempsRoutes);
+app.use("/api/emplois", emploiDuTempsRoutes);
+app.use("/api/auth", routesAuth);
+app.use("/api/eleves", routesEleve);
 app.use("/api/paiements", routesPaiement);
 app.use("/api/offres", routesOffre);
 app.use("/api/candidatures", routesCandidature);
 app.use("/api/classes", routesClasse);
 app.use("/api/matieres", routesMatiere);
-app.use('/api/notes', noteRoutes);
-
-// Route racine
-app.get('/', (req, res) => {
-  res.json({
-    status: 'success',
-    message: 'Backend Kankadi Internationale en marche',
-    version: '1.0.0',
-    environment: process.env.NODE_ENV,
-    dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
-  });
-});
-
-// Route de santé
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    dbState: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    environment: process.env.NODE_ENV,
-    uptime: process.uptime()
-  });
-});
+app.use("/api/notes", noteRoutes);
 
 // Gestion des erreurs
-app.use((req, res, next) => {
-  res.status(404).json({ status: 'error', message: 'Route non trouvée' });
-});
-
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  
-  // Gestion spécifique des erreurs CORS
-  if (err.message === 'Non autorisé par CORS') {
-    return res.status(403).json({ 
-      status: 'error', 
-      message: 'Accès interdit par la politique CORS' 
-    });
-  }
+  res.status(500).json({ error: 'Erreur interne du serveur' });
+});
 
-  res.status(500).json({
-    status: 'error',
-    message: 'Erreur interne du serveur',
-    ...(!isProduction && { stack: err.stack })
-  });
+// Gestion des routes non trouvées
+app.use((req, res) => {
+  res.status(404).json({ error: 'Route non trouvée' });
 });
 
 // Démarrage du serveur
 server.listen(PORT, () => {
   console.log(`🚀 Serveur démarré sur le port ${PORT}`);
   console.log(`Mode: ${isProduction ? 'PRODUCTION' : 'DEVELOPPEMENT'}`);
-  console.log(`Origines autorisées: ${allowedOrigins.join(', ')}`);
-  console.log(`URL MongoDB: ${mongoose.connection.host || 'Non connecté'}`);
 });
 
-// Gestion des erreurs non catchées
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection:', err);
-  process.exit(1);
+// Gestion propre des arrêts
+process.on('SIGTERM', () => {
+  console.log('SIGTERM reçu. Arrêt du serveur...');
+  server.close(() => {
+    console.log('Serveur arrêté');
+    process.exit(0);
+  });
 });
 
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-  process.exit(1);
+process.on('SIGINT', () => {
+  console.log('SIGINT reçu. Arrêt du serveur...');
+  server.close(() => {
+    console.log('Serveur arrêté');
+    process.exit(0);
+  });
 });
