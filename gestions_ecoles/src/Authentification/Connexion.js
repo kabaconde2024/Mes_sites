@@ -100,8 +100,8 @@ localStorage.setItem('userRole', response.data.user?.role);  // Assurez-vous que
           <Box mt={2} textAlign="center">
             <Typography variant="body2" color="textSecondary">
               Vous n'avez pas de compte ?{' '}
-<Link to="/#/Inscription">Inscrivez-vous ici</Link>      
-      </Typography>
+             <Link to="/Inscription">Inscrivez-vous ici</Link>
+            </Typography>
           </Box>
         </Box>
       </Box>
