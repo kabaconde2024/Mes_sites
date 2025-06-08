@@ -18,8 +18,8 @@ const ModifierPaiement = () => {
 
   const [eleves, setEleves] = useState([]); // Pour stocker la liste des élèves
 
-  const API_URL = "http://localhost:5000/api/paiements";
-  const API_ELEVES_URL = "http://localhost:5000/api/eleves"; // URL pour récupérer la liste des élèves
+  const API_URL = "https://mes-sites.onrender.com/api/paiements";
+  const API_ELEVES_URL = "https://mes-sites.onrender.com/api/eleves"; // URL pour récupérer la liste des élèves
 
   // Récupérer la liste des élèves
   useEffect(() => {

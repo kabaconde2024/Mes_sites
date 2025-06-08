@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 const ListePaiement = () => {
   const [paiements, setPaiements] = useState([]);
-  const API_URL = "http://localhost:5000/api/paiements";
+  const API_URL = "https://mes-sites.onrender.com/api/paiements";
   const navigate = useNavigate();
 
   useEffect(() => {

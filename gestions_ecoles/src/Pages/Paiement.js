@@ -36,8 +36,8 @@ const AjoutPaiement = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
-  const API_URL = "http://localhost:5000/api/paiements";
-  const API_ELEVES_URL = "http://localhost:5000/api/eleves";
+  const API_URL = "https://mes-sites.onrender.com/api/paiements";
+  const API_ELEVES_URL = "https://mes-sites.onrender.com/api/eleves";
   const anneesScolaires = ["2023-2024", "2024-2025", "2025-2026"];
 
   useEffect(() => {

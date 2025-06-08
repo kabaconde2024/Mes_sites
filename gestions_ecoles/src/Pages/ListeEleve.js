@@ -15,7 +15,7 @@ const ListeEleve = () => {
     const token = localStorage.getItem('token');  
     console.log('Token:', token);  
     try {  
-        const response = await axios.get('http://localhost:5000/api/eleves', {  
+        const response = await axios.get('https://mes-sites.onrender.com/api/eleves', {  
             headers: {  
                 Authorization: `Bearer ${token}`,  
             },  
@@ -33,7 +33,7 @@ const ListeEleve = () => {
     console.log('ID à supprimer:', id);
     if (id && window.confirm('Voulez-vous vraiment supprimer cet élève ?')) {
         try {
-            await axios.delete(`http://localhost:5000/api/eleves/${id}`, {
+            await axios.delete(`https://mes-sites.onrender.com/api/eleves/${id}`, {
                 headers: {
                     Authorization: `Bearer ${token}`, // Ajoutez le token ici
                 },

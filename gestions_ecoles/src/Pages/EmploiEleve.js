@@ -38,7 +38,7 @@ const EmploiEleve = () => {
     const fetchSchedule = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:5000/api/emploi/listes", 
+                "https://mes-sites.onrender.com/api/emploi/listes", 
                 getAuthHeaders()
             );
             setSchedule(response.data);
@@ -55,7 +55,7 @@ const EmploiEleve = () => {
         setLoading(true);
         try {
             const response = await axios.get(
-                "http://localhost:5000/api/enseignants/listes", 
+                "https://mes-sites.onrender.com/api/enseignants/listes", 
                 getAuthHeaders()
             );
             setTeachers(response.data);
@@ -95,7 +95,7 @@ const EmploiEleve = () => {
             console.log("Données envoyées:", dataToSend);
     
             const response = await axios.post(
-                "http://localhost:5000/api/emploi/creer", 
+                "https://mes-sites.onrender.com/api/emploi/creer", 
                 dataToSend,
                 getAuthHeaders()
             );
@@ -124,7 +124,7 @@ const EmploiEleve = () => {
     const handleDelete = async (id) => {
         try {
             await axios.delete(
-                `http://localhost:5000/api/emploi/${id}/supprimer`,
+                `https://mes-sites.onrender.com/api/emploi/${id}/supprimer`,
                 getAuthHeaders()
             );
             fetchSchedule();

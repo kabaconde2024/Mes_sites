@@ -19,7 +19,7 @@ const ModifierEleve = () => {
   // Fonction pour récupérer les informations de l'élève
   const fetchEleve = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/eleves/${id}`);
+      const response = await axios.get(`https://mes-sites.onrender.com/api/eleves/${id}`);
       setEleve(response.data);
     } catch (err) {
       console.error('Erreur lors de la récupération des informations de l\'élève:', err);
@@ -31,7 +31,7 @@ const ModifierEleve = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/api/eleves/${id}`, eleve);
+      await axios.put(`https://mes-sites.onrender.com/api/eleves/${id}`, eleve);
       alert('Élève mis à jour avec succès.');
       navigate('/listeEleve'); // Redirection vers la liste des élèves
     } catch (err) {

@@ -165,7 +165,7 @@ const Note = () => {
   const handleCreateNote = async () => {
     try {
       setError("");
-      const res = await axios.post("http://localhost:5000/api/notes", formData);
+      const res = await axios.post("https://mes-sites.onrender.com/api/notes", formData);
       
       if (!res.data) {
         throw new Error("Réponse invalide du serveur");
@@ -197,7 +197,7 @@ const Note = () => {
       if (!currentNote) return;
       
       setError("");
-      const res = await axios.put(`http://localhost:5000/api/notes/${currentNote._id}`, formData);
+      const res = await axios.put(`https://mes-sites.onrender.com/api/notes/${currentNote._id}`, formData);
       
       if (!res.data) {
         throw new Error("Réponse invalide du serveur");
@@ -220,7 +220,7 @@ const Note = () => {
     
     try {
       setError("");
-      await axios.delete(`http://localhost:5000/api/notes/${id}`);
+      await axios.delete(`https://mes-sites.onrender.com/api/notes/${id}`);
       setNotes(notes.filter(note => note._id !== id));
       setSuccess("Note supprimée avec succès");
     } catch (err) {
