@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, TextField, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 const Connexion = () => {
   const [email, setEmail] = useState('');
   const [motDePasse, setPassword] = useState('');
@@ -100,8 +100,8 @@ localStorage.setItem('userRole', response.data.user?.role);  // Assurez-vous que
           <Box mt={2} textAlign="center">
             <Typography variant="body2" color="textSecondary">
               Vous n'avez pas de compte ?{' '}
-             <Link to="/Inscription">Inscrivez-vous ici</Link>
-            </Typography>
+<Link to="/#/Inscription">Inscrivez-vous ici</Link>      
+      </Typography>
           </Box>
         </Box>
       </Box>
