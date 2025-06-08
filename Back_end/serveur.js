@@ -41,18 +41,35 @@ app.disable('x-powered-by');
 app.use(express.json({ limit: '10kb' }));
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
-// Configuration CORS
+// Configuration CORS mise à jour
 const allowedOrigins = isProduction
-  ? [process.env.FRONTEND_PROD_URL]
+  ? [
+      'https://mes-sites-2.onrender.com',
+      'https://mes-sites.onrender.com',
+      process.env.FRONTEND_PROD_URL
+    ].filter(Boolean) // Supprime les valeurs undefined
   : ['http://localhost:3000'];
 
-app.use(cors({
-  origin: allowedOrigins,
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin && isProduction) {
+      return callback(new Error('Origin non autorisé en production'), false);
+    }
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Non autorisé par CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
   maxAge: 86400
-}));
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Préflight requests
 
 // Rate Limiter
 const limiter = rateLimit({
@@ -79,7 +96,7 @@ mongoose.connect(process.env.MONGO_URI, mongoOptions)
     process.exit(1);
   });
 
-// Configuration des sessions
+// Configuration des sessions mise à jour
 app.use(session({
   name: 'kankadi.sid',
   secret: process.env.SESSION_SECRET || 'fallback-secret-123',
@@ -97,7 +114,7 @@ app.use(session({
     secure: isProduction,
     sameSite: isProduction ? 'none' : 'lax',
     maxAge: 86400000,
-    domain: isProduction ? process.env.COOKIE_DOMAIN : undefined
+    domain: isProduction ? '.render.com' : undefined
   }
 }));
 
@@ -165,6 +182,15 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  
+  // Gestion spécifique des erreurs CORS
+  if (err.message === 'Non autorisé par CORS') {
+    return res.status(403).json({ 
+      status: 'error', 
+      message: 'Accès interdit par la politique CORS' 
+    });
+  }
+
   res.status(500).json({
     status: 'error',
     message: 'Erreur interne du serveur',
