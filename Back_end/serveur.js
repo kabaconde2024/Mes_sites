@@ -141,7 +141,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// Routes API
 app.use("/api/enseignants", enseignantRoutes);
 app.use("/api/emplois", emploiDuTempsRoutes);
 app.use("/api/auth", routesAuth);
@@ -153,12 +153,40 @@ app.use("/api/classes", routesClasse);
 app.use("/api/matieres", routesMatiere);
 app.use("/api/notes", noteRoutes);
 
-// Health check
+// Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ 
     status: 'OK', 
     timestamp: new Date(),
-    dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    dbStatus: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    uptime: process.uptime(),
+    memoryUsage: process.memoryUsage()
+  });
+});
+
+// Root endpoint - SOLUTION AU PROBLEME
+app.get('/', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Bienvenue sur l\'API Kankadi Internationale',
+    version: '1.0.0',
+    environment: isProduction ? 'production' : 'development',
+    availableEndpoints: {
+      enseignants: '/api/enseignants',
+      eleves: '/api/eleves',
+      auth: '/api/auth',
+      emplois: '/api/emplois',
+      paiements: '/api/paiements',
+      offres: '/api/offres',
+      candidatures: '/api/candidatures',
+      classes: '/api/classes',
+      matieres: '/api/matieres',
+      notes: '/api/notes'
+    },
+    documentation: isProduction 
+      ? 'https://mes-sites-backend.onrender.com/api-docs' 
+      : `http://localhost:${PORT}/api-docs`,
+    healthCheck: '/health'
   });
 });
 
@@ -169,16 +197,19 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use((err, req, res, next) => {
   console.error('🔥 Error:', err.stack);
   res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal Server Error',
-      ...(!isProduction && { stack: err.stack })
-    }
+    status: 'error',
+    message: err.message || 'Internal Server Error',
+    ...(!isProduction && { stack: err.stack })
   });
 });
 
 // Gestion des routes non trouvées
-app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
+app.use('*', (req, res) => {
+  res.status(404).json({ 
+    status: 'error',
+    message: 'Endpoint not found',
+    suggestion: 'Try accessing / for available endpoints'
+  });
 });
 
 // Démarrage du serveur
