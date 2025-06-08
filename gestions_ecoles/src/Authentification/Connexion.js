@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, TextField, Typography, Box } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 const Connexion = () => {
   const [email, setEmail] = useState('');
   const [motDePasse, setPassword] = useState('');
