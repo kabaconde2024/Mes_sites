@@ -52,7 +52,7 @@ const PageAjouterEnseignant = () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/matieres', {
+        const response = await axios.get('https://mes-sites.onrender.com/api/matieres', {
           headers: { Authorization: `Bearer ${token}` }
         });
         setMatieres(response.data);
@@ -96,7 +96,7 @@ const PageAjouterEnseignant = () => {
       setSubmitLoading(true);
       
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:5000/api/enseignants/ajout', {
+      const response = await axios.post('https://mes-sites.onrender.com/api/enseignants/ajout', {
         nom: formData.nom,
         prenom: formData.prenom,
         email: formData.email,
