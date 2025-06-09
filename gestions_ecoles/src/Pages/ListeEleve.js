@@ -29,23 +29,34 @@ const ListeEleve = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  // Fonction pour récupérer la liste des élèves
-  const fetchEleves = async () => {  
-    const token = localStorage.getItem('token');  
-    console.log('Token:', token);  
-    try {  
-        const response = await axios.get('https://mes-sites.onrender.com/api/eleves', {  
-            headers: {  
-                Authorization: `Bearer ${token}`,  
-            },  
-        });  
-        setEleves(response.data); // Mettre à jour l'état avec les données reçues
-    } catch (error) {  
-        console.error('Erreur lors de la récupération des élèves:', error);  
-        setError('Erreur lors de la récupération des élèves.'); // Afficher un message d'erreur
-    }  
-  };
-
+const fetchEleves = async () => {  
+  const token = localStorage.getItem('token');  
+  try {  
+    const response = await axios.get('https://mes-sites.onrender.com/api/eleves?populate=classe', {  
+      headers: {  
+        Authorization: `Bearer ${token}`,  
+      },  
+    });
+    
+    // Vérifiez la structure de la réponse
+    const receivedData = response.data?.data || response.data;
+    
+    if (!Array.isArray(receivedData)) {
+      throw new Error('Format de données inattendu');
+    }
+    
+    setEleves(receivedData);
+    setError('');
+    
+  } catch (error) {  
+    console.error('Erreur:', {
+      message: error.message,
+      response: error.response?.data,
+      stack: error.stack
+    });  
+    setError(error.response?.data?.message || error.message);  
+  }  
+};
   // Fonction pour supprimer un élève
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
