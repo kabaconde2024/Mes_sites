@@ -45,7 +45,7 @@ const DashboardAdmin = () => {
 
   const API_URLS = {
     eleves: "https://mes-sites.onrender.com/api/eleves",
-    enseignants: "https://mes-sites.onrender.com/api/enseignants/listes",
+    enseignants: "https://mes-sites.onrender.com/api/enseignants",
     notes: "https://mes-sites.onrender.com/api/notes",
     matieres: "https://mes-sites.onrender.com/api/matieres"
   };
@@ -56,16 +56,16 @@ const DashboardAdmin = () => {
       setError(null);
       
       const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
-        axios.get(`${API_URLS.eleves}?populate=classe`),
-        axios.get(`${API_URLS.enseignants}?populate=matiere`),
-        axios.get(`${API_URLS.notes}?populate=eleve,matiere`),
-        axios.get(`${API_URLS.matieres}?populate=enseignants`)
+        axios.get(API_URLS.eleves),
+        axios.get(API_URLS.enseignants),
+        axios.get(API_URLS.notes),
+        axios.get(API_URLS.matieres)
       ]);
       
-      setEleves(elevesRes.data);
-      setEnseignants(enseignantsRes.data);
-      setNotes(notesRes.data);
-      setMatieres(matieresRes.data);
+      setEleves(elevesRes.data.data || []);
+      setEnseignants(enseignantsRes.data.data || []);
+      setNotes(notesRes.data.data || []);
+      setMatieres(matieresRes.data.data || []);
     } catch (error) {
       console.error('Erreur API:', error);
       setError('Erreur lors de la récupération des données');
@@ -106,9 +106,9 @@ const DashboardAdmin = () => {
           mt: 2, 
           boxShadow: 3,
           maxWidth: '100%',
-          overflowX: 'auto', // Enable horizontal scrolling on mobile
+          overflowX: 'auto',
           '& .MuiTableCell-root': {
-            padding: { xs: '4px', sm: '8px' }, // Reduced padding on mobile
+            padding: { xs: '4px', sm: '8px' },
             fontSize: { xs: '0.75rem', sm: '0.875rem' }
           }
         }}
@@ -123,7 +123,7 @@ const DashboardAdmin = () => {
                     fontWeight: 'bold',
                     whiteSpace: 'nowrap',
                     display: { 
-                      xs: col.field === 'email' || col.field === 'statut' ? 'table-cell' : 'none', // Show only key columns on mobile
+                      xs: col.field === 'email' || col.field === 'statut' ? 'table-cell' : 'none',
                       sm: 'table-cell'
                     }
                   }}
