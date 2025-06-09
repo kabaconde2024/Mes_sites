@@ -96,18 +96,24 @@ exports.ajouterEleve = async (req, res) => {
     });
   }
 };
-
- exports.obtenirTousLesEleves = async (req, res) => {
+exports.obtenirTousLesEleves = async (req, res) => {
   try {
     const eleves = await Eleve.find().populate({
       path: 'classe',
       select: 'nom niveau',
-      options: { lean: true } // Pour s'assurer que l'objet est retourné même si null
+      options: { lean: true }
     });
     
-    res.json(eleves);
+    res.status(200).json({
+      success: true,
+      data: eleves
+    });
   } catch (err) {
-    res.status(500).json({ message: "Erreur lors de la récupération des élèves.", error: err });
+    res.status(500).json({ 
+      success: false,
+      message: "Erreur lors de la récupération des élèves.", 
+      error: err 
+    });
   }
 };
   

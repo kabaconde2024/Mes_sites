@@ -88,9 +88,15 @@ exports.getAllEnseignants = async (req, res) => {
       options: { lean: true }
     });
     
-    res.status(200).json(enseignants);
+    res.status(200).json({
+      success: true,
+      data: enseignants
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ 
+      success: false,
+      error: error.message 
+    });
   }
 };
 
