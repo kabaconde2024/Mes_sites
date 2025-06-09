@@ -83,7 +83,7 @@ const Header = () => {
         boxShadow: 'none',
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between', minHeight: { xs: 56, sm: 64 } }}>
+      <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
         {/* Mobile Menu Toggle */}
         {isMobile && (
           <IconButton
@@ -97,10 +97,22 @@ const Header = () => {
           </IconButton>
         )}
 
-        {/* Navigation Links (Left Side) */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {!isMobile ? (
-            navLinks.map((link, index) => (
+        {/* Logo or App Name (Now on the left) */}
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 600,
+            mr: { xs: 0, sm: 4 },
+            fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+          }}
+        >
+          EduManage
+        </Typography>
+
+        {/* Navigation Links (Next to logo on desktop) */}
+        {!isMobile && (
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+            {navLinks.map((link, index) => (
               link.submenu ? (
                 <Button
                   key={index}
@@ -123,23 +135,9 @@ const Header = () => {
                   {link.label}
                 </Button>
               )
-            ))
-          ) : null}
-        </Box>
-
-        {/* Logo or App Name (Center on Desktop, Adjusted on Mobile) */}
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            flexGrow: isMobile ? 1 : 0,
-            fontWeight: 600,
-            textAlign: { xs: 'center', sm: 'left' },
-            mx: { xs: 0, sm: 2 },
-            fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
-          }}
-        >
-          EduManage
-        </Typography>
+            ))}
+          </Box>
+        )}
 
         {/* Institution Submenu */}
         <Popover
@@ -221,7 +219,7 @@ const Header = () => {
         </Drawer>
 
         {/* Profile Menu (Right Side) */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Box sx={{ marginLeft: 'auto' }}>
           <IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
@@ -229,7 +227,6 @@ const Header = () => {
             onClick={handleMenu}
             color="inherit"
             sx={{
-              ml: 2,
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
               },
