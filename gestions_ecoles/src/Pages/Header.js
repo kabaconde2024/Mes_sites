@@ -74,58 +74,82 @@ const Header = () => {
         boxShadow: 'none',
       }}
     >
-      <Toolbar>
-        {/* Mobile Menu Button */}
-        {isMobile && (
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={handleMobileMenuToggle}
-            sx={{ mr: 2 }}
+      <Toolbar sx={{ justifyContent: 'space-between' }}>
+        {/* Left Side - Logo and Navigation */}
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          {/* Mobile Menu Button */}
+          {isMobile && (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleMobileMenuToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          {/* Logo */}
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              fontWeight: 600,
+              mr: { xs: 0, md: 4 },
+              whiteSpace: 'nowrap'
+            }}
           >
-            <MenuIcon />
+            EduManage
+          </Typography>
+
+          {/* Desktop Navigation */}
+          {!isMobile && (
+            <Box sx={{ display: 'flex' }}>
+              {navLinks.map((link, index) => (
+                link.submenu ? (
+                  <Button
+                    key={index}
+                    color="inherit"
+                    sx={{ mx: 1 }}
+                    onClick={handleInstitutionMenuOpen}
+                    aria-controls="institution-menu"
+                    aria-haspopup="true"
+                    endIcon={<ArrowDropDown />}
+                  >
+                    {link.label}
+                  </Button>
+                ) : (
+                  <Button
+                    key={index}
+                    color="inherit"
+                    sx={{ mx: 1 }}
+                    onClick={() => window.location.href = link.href}
+                  >
+                    {link.label}
+                  </Button>
+                )
+              ))}
+            </Box>
+          )}
+        </Box>
+
+        {/* Right Side - Profile */}
+        <Box>
+          <IconButton
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
+            color="inherit"
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
+            <AccountCircle />
           </IconButton>
-        )}
-
-        {/* Logo */}
-        <Typography variant="h6" sx={{ 
-          flexGrow: isMobile ? 1 : 0,
-          fontWeight: 600,
-          mr: isMobile ? 0 : 4
-        }}>
-          EduManage
-        </Typography>
-
-        {/* Desktop Navigation */}
-        {!isMobile && (
-          <Box sx={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
-            {navLinks.map((link, index) => (
-              link.submenu ? (
-                <Button
-                  key={index}
-                  color="inherit"
-                  sx={{ mx: 1 }}
-                  onClick={handleInstitutionMenuOpen}
-                  aria-controls="institution-menu"
-                  aria-haspopup="true"
-                  endIcon={<ArrowDropDown />}
-                >
-                  {link.label}
-                </Button>
-              ) : (
-                <Button
-                  key={index}
-                  color="inherit"
-                  sx={{ mx: 1 }}
-                  onClick={() => window.location.href = link.href}
-                >
-                  {link.label}
-                </Button>
-              )
-            ))}
-          </Box>
-        )}
+        </Box>
 
         {/* Institution Submenu */}
         <Popover
@@ -169,7 +193,7 @@ const Header = () => {
               maxWidth: 'none',
               backgroundColor: '#2d3748',
               color: '#ffffff',
-              mt: '56px', // Hauteur de l'AppBar
+              mt: '56px',
               borderRadius: 0,
               boxShadow: 'none'
             }
@@ -200,51 +224,35 @@ const Header = () => {
         </Menu>
 
         {/* Profile Menu */}
-        <Box>
-          <IconButton
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            color="inherit"
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            <AccountCircle />
-          </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-            PaperProps={{
-              sx: {
-                backgroundColor: '#3c4a5e',
-                color: '#ffffff',
-                '& .MuiMenuItem-root': {
-                  '&:hover': {
-                    backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                  }
+        <Menu
+          id="menu-appbar"
+          anchorEl={anchorEl}
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          keepMounted
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'right',
+          }}
+          open={Boolean(anchorEl)}
+          onClose={handleClose}
+          PaperProps={{
+            sx: {
+              backgroundColor: '#3c4a5e',
+              color: '#ffffff',
+              '& .MuiMenuItem-root': {
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
                 }
               }
-            }}
-          >
-            <MenuItem onClick={handleClose}>Profile</MenuItem>
-            <MenuItem onClick={handleClose}>Logout</MenuItem>
-          </Menu>
-        </Box>
+            }
+          }}
+        >
+          <MenuItem onClick={handleClose}>Profile</MenuItem>
+          <MenuItem onClick={handleClose}>Logout</MenuItem>
+        </Menu>
       </Toolbar>
     </AppBar>
   );
