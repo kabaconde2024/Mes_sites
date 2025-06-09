@@ -9,23 +9,16 @@ import {
   Box,
   Button,
   MenuList,
-  Popover,
-  useMediaQuery,
-  useTheme
+  Popover
 } from '@mui/material';
 import { 
   AccountCircle,
-  ArrowDropDown,
-  Menu as MenuIcon
+  ArrowDropDown
 } from '@mui/icons-material';
 
 const Header = () => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [institutionAnchorEl, setInstitutionAnchorEl] = React.useState(null);
-  const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
-
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -41,10 +34,6 @@ const Header = () => {
 
   const handleInstitutionMenuClose = () => {
     setInstitutionAnchorEl(null);
-  };
-
-  const handleMobileMenuToggle = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
   };
 
   const institutionOpen = Boolean(institutionAnchorEl);
@@ -81,75 +70,61 @@ const Header = () => {
           sx={{ 
             fontWeight: 600,
             whiteSpace: 'nowrap',
-            mr: { xs: 0, md: 4 }
+            mr: 4
           }}
         >
           EduManage
         </Typography>
 
-        {/* Mobile Menu Button */}
-        {isMobile && (
+        {/* Centered Navigation Links */}
+        <Box sx={{ 
+          display: 'flex', 
+          justifyContent: 'center',
+          flexGrow: 1
+        }}>
+          {navLinks.map((link, index) => (
+            link.submenu ? (
+              <Button
+                key={index}
+                color="inherit"
+                sx={{ mx: 1 }}
+                onClick={handleInstitutionMenuOpen}
+                aria-controls="institution-menu"
+                aria-haspopup="true"
+                endIcon={<ArrowDropDown />}
+              >
+                {link.label}
+              </Button>
+            ) : (
+              <Button
+                key={index}
+                color="inherit"
+                sx={{ mx: 1 }}
+                onClick={() => window.location.href = link.href}
+              >
+                {link.label}
+              </Button>
+            )
+          ))}
+        </Box>
+
+        {/* Profile (Right) */}
+        <Box>
           <IconButton
-            edge="start"
+            aria-label="account of current user"
+            aria-controls="menu-appbar"
+            aria-haspopup="true"
+            onClick={handleMenu}
             color="inherit"
-            aria-label="menu"
-            onClick={handleMobileMenuToggle}
-            sx={{ ml: 'auto', mr: 2 }}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
           >
-            <MenuIcon />
+            <AccountCircle />
           </IconButton>
-        )}
-
-        {/* Navigation Links (Right) */}
-        {!isMobile && (
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center',
-            marginLeft: 'auto'
-          }}>
-            {navLinks.map((link, index) => (
-              link.submenu ? (
-                <Button
-                  key={index}
-                  color="inherit"
-                  sx={{ mx: 1 }}
-                  onClick={handleInstitutionMenuOpen}
-                  aria-controls="institution-menu"
-                  aria-haspopup="true"
-                  endIcon={<ArrowDropDown />}
-                >
-                  {link.label}
-                </Button>
-              ) : (
-                <Button
-                  key={index}
-                  color="inherit"
-                  sx={{ mx: 1 }}
-                  onClick={() => window.location.href = link.href}
-                >
-                  {link.label}
-                </Button>
-              )
-            ))}
-
-            {/* Profile */}
-            <IconButton
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleMenu}
-              color="inherit"
-              sx={{
-                ml: 1,
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }
-              }}
-            >
-              <AccountCircle />
-            </IconButton>
-          </Box>
-        )}
+        </Box>
 
         {/* Institution Submenu */}
         <Popover
@@ -181,47 +156,6 @@ const Header = () => {
             ))}
           </MenuList>
         </Popover>
-
-        {/* Mobile Menu */}
-        <Menu
-          anchorEl={mobileMenuOpen ? document.body : null}
-          open={isMobile && mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-          PaperProps={{
-            sx: {
-              width: '100%',
-              maxWidth: 'none',
-              backgroundColor: '#2d3748',
-              color: '#ffffff',
-              mt: '56px',
-              borderRadius: 0,
-              boxShadow: 'none'
-            }
-          }}
-          MenuListProps={{
-            sx: {
-              padding: 0
-            }
-          }}
-        >
-          {navLinks.map((link, index) => (
-            <MenuItem 
-              key={index}
-              onClick={() => {
-                if (link.href) window.location.href = link.href;
-                setMobileMenuOpen(false);
-              }}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
-                }
-              }}
-            >
-              {link.label}
-              {link.submenu && <ArrowDropDown sx={{ ml: 1 }} />}
-            </MenuItem>
-          ))}
-        </Menu>
 
         {/* Profile Menu */}
         <Menu
