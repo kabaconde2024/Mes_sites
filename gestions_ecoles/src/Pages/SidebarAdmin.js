@@ -59,7 +59,7 @@ const SidebarAdmin = () => {
           sx={{ 
             position: 'fixed',
             left: 10,
-            top: 70,
+            top: 10,
             zIndex: theme.zIndex.drawer + 1,
             backgroundColor: '#444444',
             color: '#d7c797',
@@ -83,6 +83,7 @@ const SidebarAdmin = () => {
             color: '#fff',
             height: isMobile ? '100vh' : 'calc(100vh - 64px)',
             top: isMobile ? 0 : '64px',
+            overflowY: 'auto', // Ensure scrollability
             transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
@@ -123,7 +124,7 @@ const SidebarAdmin = () => {
         
         <Box 
           sx={{ 
-            padding: 2,
+            padding: { xs: 1, sm: 2 },
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -138,7 +139,8 @@ const SidebarAdmin = () => {
               color: '#d7c797',
               fontWeight: 'bold',
               textAlign: 'center',
-              mb: 2
+              mb: 2,
+              fontSize: { xs: '1rem', sm: '1.25rem' }
             }}
           >
             Menu Admin
@@ -146,7 +148,7 @@ const SidebarAdmin = () => {
           <Divider sx={{ width: '80%', bgcolor: '#d7c797', mb: 2 }} />
         </Box>
         
-        <List>
+        <List sx={{ paddingBottom: { xs: 2, sm: 0 } }}>
           {menuItems.map((item, index) => (
             <ListItem
               key={index}
@@ -160,13 +162,13 @@ const SidebarAdmin = () => {
                   backgroundColor: '#FFFFFF',
                   color: '#d7c797',
                 },
-                py: isMobile ? 1.5 : 1,
-                px: 2
+                py: { xs: 1, sm: 1.5 },
+                px: { xs: 1, sm: 2 }
               }}
             >
               <Box sx={{ 
                 color: '#d7c797',
-                minWidth: 40,
+                minWidth: { xs: 30, sm: 40 },
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -178,7 +180,7 @@ const SidebarAdmin = () => {
                 primaryTypographyProps={{
                   sx: {
                     fontWeight: 'medium',
-                    fontSize: isMobile ? '0.9rem' : '1rem'
+                    fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem' }
                   }
                 }} 
               />
