@@ -237,11 +237,15 @@ const fetchAllData = async () => {
                 { field: 'nom', headerName: 'Nom' },
                 { field: 'prenom', headerName: 'Prénom' },
                 { field: 'email', headerName: 'Email' },
-                { 
-                  field: 'classe', 
-                  headerName: 'Classe', 
-                  valueGetter: (row) => row.classe?.nom || 'Non attribué'
-                },
+               { 
+  field: 'classe', 
+  headerName: 'Classes', 
+  valueGetter: (row) => {
+    return row.classe?.length > 0 
+      ? row.classe.map(c => c.nom).join(', ') 
+      : 'Non attribué';
+  }
+},
                 { 
                   field: 'statut', 
                   headerName: 'Statut', 
@@ -277,11 +281,15 @@ const fetchAllData = async () => {
                 { field: 'nom', headerName: 'Nom' },
                 { field: 'prenom', headerName: 'Prénom' },
                 { field: 'email', headerName: 'Email' },
-                { 
-                  field: 'matiere', 
-                  headerName: 'Matière', 
-                  valueGetter: (row) => row.matiere?.nom || 'Non assigné'
-                }
+              { 
+  field: 'matiere', 
+  headerName: 'Matières', 
+  valueGetter: (row) => {
+    return row.matiere?.length > 0 
+      ? row.matiere.map(m => m.nom).join(', ') 
+      : 'Non assigné';
+  }
+}
               ])}
             </Box>
           )}
