@@ -37,6 +37,7 @@ import axios from 'axios';
 const PageAjouterEleve = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
   
   // États du formulaire
   const [formData, setFormData] = useState({
@@ -187,40 +188,48 @@ const PageAjouterEleve = () => {
       display: 'flex', 
       flexDirection: 'column',
       minHeight: '100vh',
-      pt: '64px',
-      [theme.breakpoints.down('sm')]: {
-        pt: '56px'
-      }
+      pt: { xs: '56px', sm: '64px' },
+      bgcolor: '#f5f5f5'
     }}>
       <Header />
-      <Box sx={{ display: 'flex', flex: 1 }}>
+      <Box sx={{ 
+        display: 'flex', 
+        flex: 1, 
+        flexDirection: { xs: 'column', sm: 'row' },
+        width: '100%'
+      }}>
         <SidebarAdmin />
         <Box component="main" sx={{ 
           flexGrow: 1, 
-          bgcolor: '#f5f5f5', 
-          p: isMobile ? 1 : 3,
-          width: '100%'
+          p: { xs: 1, sm: 2, md: 3 },
+          width: { xs: '100%', sm: 'auto' }
         }}>
-          <Grid container spacing={isMobile ? 1 : 3}>
+          <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
             <Grid item xs={12}>
               <Card sx={{ 
-                borderRadius: isMobile ? 0 : theme.shape.borderRadius,
-                boxShadow: isMobile ? 'none' : theme.shadows[3]
+                borderRadius: { xs: 0, sm: theme.shape.borderRadius },
+                boxShadow: { xs: 'none', sm: theme.shadows[3] },
+                overflow: 'hidden'
               }}>
-                <CardContent>
-                  <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom sx={{ 
-                    display: 'flex', 
-                    alignItems: 'center',
-                    mb: isMobile ? 1 : 2
-                  }}>
-                    <Person sx={{ mr: 1, fontSize: isMobile ? '1.25rem' : '1.5rem' }} />
+                <CardContent sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+                  <Typography 
+                    variant={isMobile ? 'h6' : 'h5'} 
+                    gutterBottom 
+                    sx={{ 
+                      display: 'flex', 
+                      alignItems: 'center',
+                      mb: { xs: 1, sm: 2 },
+                      fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+                    }}
+                  >
+                    <Person sx={{ mr: 1, fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' } }} />
                     Ajouter un Élève
                   </Typography>
                   
                   <form onSubmit={handleSubmit}>
-                    <Grid container spacing={isMobile ? 1 : 3}>
+                    <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
                       {/* Nom */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Nom *"
                           name="nom"
@@ -235,11 +244,12 @@ const PageAjouterEleve = () => {
                               </InputAdornment>
                             ),
                           }}
+                          sx={{ mb: { xs: 1, sm: 0 } }}
                         />
                       </Grid>
                       
                       {/* Prénom */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Prénom *"
                           name="prenom"
@@ -254,11 +264,12 @@ const PageAjouterEleve = () => {
                               </InputAdornment>
                             ),
                           }}
+                          sx={{ mb: { xs: 1, sm: 0 } }}
                         />
                       </Grid>
                       
                       {/* Date de Naissance */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Date de Naissance"
                           name="dateNaissance"
@@ -275,11 +286,12 @@ const PageAjouterEleve = () => {
                               </InputAdornment>
                             ),
                           }}
+                          sx={{ mb: { xs: 1, sm: 0 } }}
                         />
                       </Grid>
                       
                       {/* Adresse */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Adresse"
                           name="adresse"
@@ -294,11 +306,12 @@ const PageAjouterEleve = () => {
                               </InputAdornment>
                             ),
                           }}
+                          sx={{ mb: { xs: 1, sm: 0 } }}
                         />
                       </Grid>
                       
                       {/* Email */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Email *"
                           name="email"
@@ -314,11 +327,12 @@ const PageAjouterEleve = () => {
                               </InputAdornment>
                             ),
                           }}
+                          sx={{ mb: { xs: 1, sm: 0 } }}
                         />
                       </Grid>
                       
                       {/* Téléphone */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <TextField
                           label="Téléphone"
                           name="telephone"
@@ -334,11 +348,12 @@ const PageAjouterEleve = () => {
                               </InputAdornment>
                             ),
                           }}
+                          sx={{ mb: { xs: 1, sm: 0 } }}
                         />
                       </Grid>
                       
                       {/* Classe */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <FormControl fullWidth size={isMobile ? 'small' : 'medium'}>
                           <InputLabel>Classe *</InputLabel>
                           <Select
@@ -350,7 +365,7 @@ const PageAjouterEleve = () => {
                           >
                             {loadingClasses ? (
                               <MenuItem value="">
-                                <CircularProgress size={24} />
+                                <CircularProgress size={isMobile ? 20 : 24} />
                               </MenuItem>
                             ) : (
                               classes.map((classe) => (
@@ -365,7 +380,7 @@ const PageAjouterEleve = () => {
                       </Grid>
                       
                       {/* Statut */}
-                      <Grid item xs={12} md={6}>
+                      <Grid item xs={12} sm={6}>
                         <FormControl fullWidth size={isMobile ? 'small' : 'medium'}>
                           <InputLabel>Statut</InputLabel>
                           <Select
@@ -395,10 +410,11 @@ const PageAjouterEleve = () => {
                           fullWidth
                           size={isMobile ? 'medium' : 'large'}
                           disabled={submitLoading}
-                          startIcon={submitLoading ? <CircularProgress size={24} color="inherit" /> : <Person />}
+                          startIcon={submitLoading ? <CircularProgress size={isMobile ? 20 : 24} color="inherit" /> : <Person />}
                           sx={{ 
-                            mt: isMobile ? 1 : 2,
-                            py: isMobile ? 1 : 1.5
+                            mt: { xs: 1, sm: 2 },
+                            py: { xs: 1, sm: 1.5 },
+                            fontSize: { xs: '0.875rem', sm: '1rem' }
                           }}
                         >
                           {submitLoading ? 'En cours...' : 'Ajouter Élève'}
@@ -416,12 +432,18 @@ const PageAjouterEleve = () => {
             open={openSnackbar}
             autoHideDuration={6000}
             onClose={handleCloseSnackbar}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            anchorOrigin={{ 
+              vertical: isMobile ? 'bottom' : 'top', 
+              horizontal: 'center' 
+            }}
           >
             <Alert
               onClose={handleCloseSnackbar}
               severity={error ? 'error' : 'success'}
-              sx={{ width: '100%' }}
+              sx={{ 
+                width: { xs: '90%', sm: '100%' },
+                fontSize: { xs: '0.75rem', sm: '0.875rem' }
+              }}
             >
               {error || success}
             </Alert>
