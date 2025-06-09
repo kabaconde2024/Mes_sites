@@ -98,7 +98,8 @@ const PageAjouterEleve = () => {
     setOpenSnackbar(false);
   };
 
-  const handleSubmit = async (e) => {
+
+const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -138,17 +139,8 @@ const PageAjouterEleve = () => {
       setSuccess(response.data.message || "Élève ajouté avec succès");
       setOpenSnackbar(true);
       
+      // Modification ici - suppression de la réinitialisation du formulaire et redirection après 2s
       setTimeout(() => {
-        setFormData({
-          nom: '',
-          prenom: '',
-          dateNaissance: '',
-          adresse: '',
-          email: '',
-          telephone: '',
-          classe: '',
-          statut: 'actif',
-        });
         navigate('/dashboardAdmin');
       }, 2000);
 
