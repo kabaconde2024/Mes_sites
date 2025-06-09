@@ -10,10 +10,6 @@ import {
   Button,
   MenuList,
   Popover,
-  Drawer,
-  List,
-  ListItem,
-  ListItemText,
   useMediaQuery,
   useTheme
 } from '@mui/material';
@@ -29,8 +25,7 @@ const Header = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
 
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -50,10 +45,6 @@ const Header = () => {
 
   const handleMobileMenuToggle = () => {
     setMobileMenuOpen(!mobileMenuOpen);
-  };
-
-  const handleMobileMenuClose = () => {
-    setMobileMenuOpen(false);
   };
 
   const institutionOpen = Boolean(institutionAnchorEl);
@@ -83,13 +74,13 @@ const Header = () => {
         boxShadow: 'none',
       }}
     >
-      <Toolbar sx={{ minHeight: { xs: 56, sm: 64 } }}>
-        {/* Mobile Menu Toggle */}
+      <Toolbar>
+        {/* Mobile Menu Button */}
         {isMobile && (
           <IconButton
             edge="start"
             color="inherit"
-            aria-label="open menu"
+            aria-label="menu"
             onClick={handleMobileMenuToggle}
             sx={{ mr: 2 }}
           >
@@ -97,27 +88,24 @@ const Header = () => {
           </IconButton>
         )}
 
-        {/* Logo or App Name (Now on the left) */}
-        <Typography 
-          variant="h6" 
-          sx={{ 
-            fontWeight: 600,
-            mr: { xs: 0, sm: 4 },
-            fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
-          }}
-        >
+        {/* Logo */}
+        <Typography variant="h6" sx={{ 
+          flexGrow: isMobile ? 1 : 0,
+          fontWeight: 600,
+          mr: isMobile ? 0 : 4
+        }}>
           EduManage
         </Typography>
 
-        {/* Navigation Links (Next to logo on desktop) */}
+        {/* Desktop Navigation */}
         {!isMobile && (
-          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1 }}>
+          <Box sx={{ display: 'flex', flexGrow: 1, alignItems: 'center' }}>
             {navLinks.map((link, index) => (
               link.submenu ? (
                 <Button
                   key={index}
                   color="inherit"
-                  sx={{ mx: { xs: 0.5, sm: 1 }, whiteSpace: 'nowrap' }}
+                  sx={{ mx: 1 }}
                   onClick={handleInstitutionMenuOpen}
                   aria-controls="institution-menu"
                   aria-haspopup="true"
@@ -129,7 +117,7 @@ const Header = () => {
                 <Button
                   key={index}
                   color="inherit"
-                  sx={{ mx: { xs: 0.5, sm: 1 }, whiteSpace: 'nowrap' }}
+                  sx={{ mx: 1 }}
                   onClick={() => window.location.href = link.href}
                 >
                   {link.label}
@@ -157,7 +145,7 @@ const Header = () => {
             sx: {
               backgroundColor: '#3c4a5e',
               color: '#ffffff',
-              minWidth: { xs: 150, sm: 200 },
+              minWidth: 200,
             }
           }}
         >
@@ -170,56 +158,49 @@ const Header = () => {
           </MenuList>
         </Popover>
 
-        {/* Mobile Drawer for Navigation */}
-        <Drawer
-          anchor="left"
-          open={mobileMenuOpen}
-          onClose={handleMobileMenuClose}
-          sx={{
-            '& .MuiDrawer-paper': {
-              width: { xs: '70%', sm: '250px' },
+        {/* Mobile Menu */}
+        <Menu
+          anchorEl={mobileMenuOpen ? document.body : null}
+          open={isMobile && mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          PaperProps={{
+            sx: {
+              width: '100%',
+              maxWidth: 'none',
               backgroundColor: '#2d3748',
               color: '#ffffff',
+              mt: '56px', // Hauteur de l'AppBar
+              borderRadius: 0,
+              boxShadow: 'none'
+            }
+          }}
+          MenuListProps={{
+            sx: {
+              padding: 0
             }
           }}
         >
-          <List>
-            {navLinks.map((link, index) => (
-              <ListItem 
-                key={index} 
-                button 
-                onClick={() => {
-                  if (link.href) window.location.href = link.href;
-                  handleMobileMenuClose();
-                }}
-                sx={{ 
-                  '&:hover': { backgroundColor: 'rgba(255, 255, 255, 0.1)' },
-                  py: 1,
-                  px: 2
-                }}
-              >
-                <ListItemText 
-                  primary={link.label} 
-                  primaryTypographyProps={{ 
-                    fontSize: { xs: '0.9rem', sm: '1rem' }
-                  }}
-                />
-                {link.submenu && (
-                  <IconButton 
-                    size="small" 
-                    onClick={handleInstitutionMenuOpen}
-                    sx={{ ml: 1 }}
-                  >
-                    <ArrowDropDown />
-                  </IconButton>
-                )}
-              </ListItem>
-            ))}
-          </List>
-        </Drawer>
+          {navLinks.map((link, index) => (
+            <MenuItem 
+              key={index}
+              onClick={() => {
+                if (link.href) window.location.href = link.href;
+                setMobileMenuOpen(false);
+              }}
+              sx={{
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              {link.label}
+              {link.submenu && <ArrowDropDown sx={{ ml: 1 }} />}
+            </MenuItem>
+          ))}
+        </Menu>
 
-        {/* Profile Menu (Right Side) */}
-        <Box sx={{ marginLeft: 'auto' }}>
+        {/* Profile Menu */}
+        <Box>
           <IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
@@ -229,8 +210,7 @@ const Header = () => {
             sx={{
               '&:hover': {
                 backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              },
-              fontSize: { xs: '1.5rem', sm: '1.75rem' }
+              }
             }}
           >
             <AccountCircle />
@@ -257,8 +237,7 @@ const Header = () => {
                   '&:hover': {
                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
                   }
-                },
-                minWidth: { xs: 150, sm: 200 },
+                }
               }
             }}
           >
