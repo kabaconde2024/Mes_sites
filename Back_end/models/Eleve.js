@@ -10,7 +10,7 @@ const eleveSchema = new mongoose.Schema({
   telephone: { type: String, required: true },
 classe: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Enseignant'
+    ref: 'Classe'
   }],  inscriptionDate: { type: Date, default: Date.now },
   statut: { type: String, enum: ['actif', 'inactif'], default: 'actif' }, // Statut de l'élève
 }, {

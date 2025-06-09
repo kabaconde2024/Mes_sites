@@ -82,7 +82,12 @@ exports.createEnseignant = async (req, res) => {
 // Récupérer tous les enseignants
 exports.getAllEnseignants = async (req, res) => {
   try {
-    const enseignants = await Enseignant.find();
+    const enseignants = await Enseignant.find().populate({
+      path: 'matiere',
+      select: 'nom coefficient',
+      options: { lean: true }
+    });
+    
     res.status(200).json(enseignants);
   } catch (error) {
     res.status(500).json({ error: error.message });
