@@ -25,6 +25,8 @@ const Accueil = () => {
   const navigate = useNavigate();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
+  const isDesktop = useMediaQuery(theme.breakpoints.up('md'));
+  const isLargeDesktop = useMediaQuery(theme.breakpoints.up('lg'));
 
   const features = [
     {
@@ -54,26 +56,28 @@ const Accueil = () => {
       <Header />
       <Box sx={{ 
         flexGrow: 1, 
-        pt: { xs: '56px', sm: '64px' } // Ajustement pour le header sur mobile
+        pt: { xs: '56px', sm: '64px' }, // Adjust for header height
+        bgcolor: theme.palette.background.default
       }}>
-        {/* Hero Section */}
+        {/* Hero Section - Drupal-like Header Region */}
         <Box 
           sx={{ 
             bgcolor: theme.palette.primary.main,
             color: 'white',
-            py: { xs: 4, sm: 6, md: 8 },
+            py: { xs: 3, sm: 4, md: 6, lg: 8 },
+            px: { xs: 1, sm: 2, md: 3 },
             textAlign: 'center',
-            px: { xs: 2, sm: 0 }
+            borderBottom: `1px solid ${theme.palette.divider}`
           }}
         >
-          <Container maxWidth="md">
+          <Container maxWidth="lg">
             <Typography 
-              variant={isMobile ? 'h4' : 'h2'} 
+              variant={isMobile ? 'h4' : isTablet ? 'h3' : 'h2'} 
               component="h1" 
               gutterBottom 
               sx={{ 
                 fontWeight: 700,
-                fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' }
+                fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem', lg: '3rem' }
               }}
             >
               Bienvenue sur EduManage
@@ -83,8 +87,10 @@ const Accueil = () => {
               component="p" 
               gutterBottom 
               sx={{ 
-                mb: { xs: 2, sm: 4 },
-                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.25rem' }
+                mb: { xs: 2, sm: 3, md: 4 },
+                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.25rem' },
+                maxWidth: { sm: '80%', md: '60%' },
+                mx: 'auto'
               }}
             >
               La plateforme de gestion scolaire complète pour l'ISMG
@@ -96,9 +102,9 @@ const Accueil = () => {
               endIcon={<ArrowForward />}
               onClick={() => navigate('/formation')}
               sx={{ 
-                px: { xs: 2, sm: 3, md: 4 },
+                px: { xs: 2, sm: 3, md: 4, lg: 5 },
                 py: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1.1rem' }
+                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem', lg: '1.1rem' }
               }}
             >
               Découvrir nos formations
@@ -106,8 +112,8 @@ const Accueil = () => {
           </Container>
         </Box>
 
-        {/* Features Section */}
-        <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
+        {/* Features Section - Drupal-like Content Region */}
+        <Container maxWidth="lg" sx={{ py: { xs: 3, sm: 4, md: 6, lg: 8 } }}>
           <Typography 
             variant={isMobile ? 'h5' : 'h4'} 
             component="h2" 
@@ -115,13 +121,13 @@ const Accueil = () => {
             gutterBottom 
             sx={{ 
               fontWeight: 600, 
-              mb: { xs: 2, sm: 4 },
-              fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }
+              mb: { xs: 2, sm: 3, md: 4 },
+              fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' }
             }}
           >
             Nos Fonctionnalités
           </Typography>
-          <Grid container spacing={isMobile ? 2 : 4}>
+          <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
             {features.map((feature, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
                 <Card 
@@ -130,18 +136,20 @@ const Accueil = () => {
                     display: 'flex',
                     flexDirection: 'column',
                     transition: 'transform 0.3s',
+                    boxShadow: theme.shadows[1],
                     '&:hover': {
                       transform: 'translateY(-5px)',
                       boxShadow: theme.shadows[6]
-                    }
+                    },
+                    border: `1px solid ${theme.palette.divider}`
                   }}
                 >
                   <CardContent sx={{ 
                     flexGrow: 1, 
                     textAlign: 'center',
-                    p: { xs: 2, sm: 3 }
+                    p: { xs: 2, sm: 3, md: 4 }
                   }}>
-                    <Box sx={{ mb: { xs: 1, sm: 2 } }}>
+                    <Box sx={{ mb: { xs: 1, sm: 2 }, color: theme.palette.primary.main }}>
                       {React.cloneElement(feature.icon, { 
                         fontSize: isMobile ? 'medium' : 'large' 
                       })}
@@ -152,7 +160,7 @@ const Accueil = () => {
                       gutterBottom 
                       sx={{ 
                         fontWeight: 600,
-                        fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' }
+                        fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem', lg: '1.5rem' }
                       }}
                     >
                       {feature.title}
@@ -161,7 +169,7 @@ const Accueil = () => {
                       variant="body2" 
                       color="text.secondary"
                       sx={{
-                        fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
+                        fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem', lg: '1.125rem' }
                       }}
                     >
                       {feature.description}
@@ -173,13 +181,14 @@ const Accueil = () => {
           </Grid>
         </Container>
 
-        {/* Call to Action */}
+        {/* Call to Action - Drupal-like Footer Region */}
         <Box 
           sx={{ 
             bgcolor: theme.palette.grey[100],
-            py: { xs: 4, sm: 6, md: 8 },
+            py: { xs: 3, sm: 4, md: 6, lg: 8 },
             textAlign: 'center',
-            px: { xs: 2, sm: 0 }
+            px: { xs: 1, sm: 2, md: 3 },
+            borderTop: `1px solid ${theme.palette.divider}`
           }}
         >
           <Container maxWidth="md">
@@ -189,8 +198,8 @@ const Accueil = () => {
               gutterBottom 
               sx={{ 
                 fontWeight: 600, 
-                mb: { xs: 2, sm: 3 },
-                fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }
+                mb: { xs: 2, sm: 3, md: 4 },
+                fontSize: { xs: '1.2rem', sm: '1.5rem', md: '1.75rem', lg: '2rem' }
               }}
             >
               Prêt à transformer votre expérience scolaire ?
@@ -201,9 +210,9 @@ const Accueil = () => {
               size={isMobile ? 'medium' : 'large'}
               onClick={() => navigate('/contact')}
               sx={{ 
-                px: { xs: 2, sm: 4, md: 6 },
+                px: { xs: 2, sm: 3, md: 4, lg: 5 },
                 py: { xs: 1, sm: 1.5 },
-                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1.1rem' }
+                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1rem', lg: '1.1rem' }
               }}
             >
               Nous contacter
