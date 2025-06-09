@@ -43,37 +43,37 @@ const DashboardAdmin = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
- const API_URLS = {
-  eleves: "https://mes-sites.onrender.com/api/eleves?populate=classe",
-  enseignants: "https://mes-sites.onrender.com/api/enseignants?populate=matiere",
-  notes: "https://mes-sites.onrender.com/api/notes?populate=eleve,matiere",
-  matieres: "https://mes-sites.onrender.com/api/matieres?populate=enseignants"
-};
+  const API_URLS = {
+    eleves: "https://mes-sites.onrender.com/api/eleves",
+    enseignants: "https://mes-sites.onrender.com/api/enseignants",
+    notes: "https://mes-sites.onrender.com/api/notes",
+    matieres: "https://mes-sites.onrender.com/api/matieres"
+  };
 
-const fetchAllData = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
-      axios.get(API_URLS.eleves),
-      axios.get(API_URLS.enseignants),
-      axios.get(API_URLS.notes),
-      axios.get(API_URLS.matieres)
-    ]);
-    
-    // Supposons que l'API retourne directement le tableau de données
-    setEleves(elevesRes.data || []);
-    setEnseignants(enseignantsRes.data || []);
-    setNotes(notesRes.data || []);
-    setMatieres(matieresRes.data || []);
-  } catch (error) {
-    console.error('Erreur API:', error);
-    setError('Erreur lors de la récupération des données');
-  } finally {
-    setLoading(false);
-  }
-};
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
+        axios.get(API_URLS.eleves),
+        axios.get(API_URLS.enseignants),
+        axios.get(API_URLS.notes),
+        axios.get(API_URLS.matieres)
+      ]);
+      
+      setEleves(elevesRes.data.data || []);
+      setEnseignants(enseignantsRes.data.data || []);
+      setNotes(notesRes.data.data || []);
+      setMatieres(matieresRes.data.data || []);
+    } catch (error) {
+      console.error('Erreur API:', error);
+      setError('Erreur lors de la récupération des données');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAllData();
   }, []);
