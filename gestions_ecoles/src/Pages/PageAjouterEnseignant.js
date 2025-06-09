@@ -14,7 +14,9 @@ import {
   Chip,
   InputAdornment,
   Snackbar,
-  Alert
+  Alert,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import { 
   Person, 
@@ -33,6 +35,9 @@ import axios from 'axios';
 import Header from './Header';
 
 const PageAjouterEnseignant = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  
   const [formData, setFormData] = useState({
     nom: '',
     prenom: '',
@@ -82,6 +87,7 @@ const PageAjouterEnseignant = () => {
       matieres: Array.isArray(value) ? value : [value]
     }));
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -116,9 +122,8 @@ const PageAjouterEnseignant = () => {
           telephone: '',
         });
         
-        // Optionnel: Redirection après un délai
         setTimeout(() => {
-          navigate('/dashboardAdmin'); // Redirige vers la liste des enseignants
+          navigate('/dashboardAdmin');
         }, 2000);
       }
     } catch (err) {
@@ -130,6 +135,7 @@ const PageAjouterEnseignant = () => {
       setSubmitLoading(false);
     }
   };
+
   const handleCloseSuccessSnackbar = () => {
     setSuccess(false);
   };
@@ -139,148 +145,178 @@ const PageAjouterEnseignant = () => {
   };
 
   return (
-    <Box sx={{ display: 'flex', flex: 1, pt: '64px', height: 'calc(100vh - 64px)' }}>
-      <Header/>
-      <SidebarAdmin />
-      <Box component="main" sx={{ flexGrow: 1, bgcolor: '#f5f5f5', p: 3 }}>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="h5" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
-                  <School sx={{ mr: 1 }} />
-                  Ajouter un Enseignant
-                </Typography>
-                <form onSubmit={handleSubmit}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Nom"
-                        name="nom"
-                        value={formData.nom}
-                        onChange={handleChange}
-                        required
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <PersonOutline />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Prénom"
-                        name="prenom"
-                        value={formData.prenom}
-                        onChange={handleChange}
-                        required
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <PersonOutline />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        required
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Email />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Téléphone"
-                        name="telephone"
-                        type="tel"
-                        value={formData.telephone}
-                        onChange={handleChange}
-                        required
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              <Phone />
-                            </InputAdornment>
-                          ),
-                        }}
-                      />
-                    </Grid>
-                    <Grid item xs={12}>
-                      <FormControl fullWidth required>
-                        <InputLabel>Matières enseignées</InputLabel>
-                        <Select
-                          multiple
-                          label="Matières enseignées"
-                          value={formData.matieres}
-                          onChange={handleMatiereChange}
-                          disabled={loading}
-                          renderValue={(selected) => (
-                            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                              {selected.map((matiereId) => {
-                                const matiere = matieres.find(m => m._id === matiereId);
-                                return matiere ? (
-                                  <Chip 
-                                    key={matiereId} 
-                                    label={`${matiere.nom} (Coef: ${matiere.coefficient})`}
-                                    icon={<Book fontSize="small" />}
-                                  />
-                                ) : null;
-                              })}
-                            </Box>
-                          )}
-                        >
-                          {loading ? (
-                            <MenuItem disabled>
-                              <CircularProgress size={24} />
-                            </MenuItem>
-                          ) : (
-                            matieres.map((matiere) => (
-                              <MenuItem key={matiere._id} value={matiere._id}>
-                                <Book sx={{ mr: 1 }} fontSize="small" />
-                                {matiere.nom} (Coefficient: {matiere.coefficient})
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column',
+      minHeight: '100vh',
+      pt: '64px',
+      [theme.breakpoints.down('sm')]: {
+        pt: '56px'
+      }
+    }}>
+      <Header />
+      <Box sx={{ display: 'flex', flex: 1 }}>
+        <SidebarAdmin />
+        <Box component="main" sx={{ 
+          flexGrow: 1, 
+          bgcolor: '#f5f5f5', 
+          p: isMobile ? 1 : 3,
+          width: '100%'
+        }}>
+          <Grid container spacing={isMobile ? 1 : 3}>
+            <Grid item xs={12}>
+              <Card sx={{ 
+                borderRadius: isMobile ? 0 : theme.shape.borderRadius,
+                boxShadow: isMobile ? 'none' : theme.shadows[3]
+              }}>
+                <CardContent>
+                  <Typography variant={isMobile ? 'h6' : 'h5'} gutterBottom sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center',
+                    mb: isMobile ? 1 : 2
+                  }}>
+                    <School sx={{ mr: 1, fontSize: isMobile ? '1.25rem' : '1.5rem' }} />
+                    Ajouter un Enseignant
+                  </Typography>
+                  <form onSubmit={handleSubmit}>
+                    <Grid container spacing={isMobile ? 1 : 3}>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Nom"
+                          name="nom"
+                          value={formData.nom}
+                          onChange={handleChange}
+                          required
+                          size={isMobile ? 'small' : 'medium'}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <PersonOutline fontSize={isMobile ? 'small' : 'medium'} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Prénom"
+                          name="prenom"
+                          value={formData.prenom}
+                          onChange={handleChange}
+                          required
+                          size={isMobile ? 'small' : 'medium'}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <PersonOutline fontSize={isMobile ? 'small' : 'medium'} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          required
+                          size={isMobile ? 'small' : 'medium'}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Email fontSize={isMobile ? 'small' : 'medium'} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12} md={6}>
+                        <TextField
+                          fullWidth
+                          label="Téléphone"
+                          name="telephone"
+                          type="tel"
+                          value={formData.telephone}
+                          onChange={handleChange}
+                          required
+                          size={isMobile ? 'small' : 'medium'}
+                          InputProps={{
+                            startAdornment: (
+                              <InputAdornment position="start">
+                                <Phone fontSize={isMobile ? 'small' : 'medium'} />
+                              </InputAdornment>
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <FormControl fullWidth required size={isMobile ? 'small' : 'medium'}>
+                          <InputLabel>Matières enseignées</InputLabel>
+                          <Select
+                            multiple
+                            label="Matières enseignées"
+                            value={formData.matieres}
+                            onChange={handleMatiereChange}
+                            disabled={loading}
+                            renderValue={(selected) => (
+                              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                                {selected.map((matiereId) => {
+                                  const matiere = matieres.find(m => m._id === matiereId);
+                                  return matiere ? (
+                                    <Chip 
+                                      key={matiereId} 
+                                      label={`${matiere.nom} (Coef: ${matiere.coefficient})`}
+                                      icon={<Book fontSize="small" />}
+                                      size={isMobile ? 'small' : 'medium'}
+                                    />
+                                  ) : null;
+                                })}
+                              </Box>
+                            )}
+                          >
+                            {loading ? (
+                              <MenuItem disabled>
+                                <CircularProgress size={24} />
                               </MenuItem>
-                            ))
-                          )}
-                        </Select>
-                      </FormControl>
+                            ) : (
+                              matieres.map((matiere) => (
+                                <MenuItem key={matiere._id} value={matiere._id}>
+                                  <Book sx={{ mr: 1 }} fontSize="small" />
+                                  {matiere.nom} (Coefficient: {matiere.coefficient})
+                                </MenuItem>
+                              ))
+                            )}
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Button 
+                          type="submit" 
+                          variant="contained" 
+                          color="primary" 
+                          size={isMobile ? 'medium' : 'large'}
+                          fullWidth
+                          disabled={submitLoading}
+                          startIcon={submitLoading ? <CircularProgress size={24} /> : <Person />}
+                          sx={{
+                            py: isMobile ? 1 : 1.5
+                          }}
+                        >
+                          {submitLoading ? 'Ajout en cours...' : 'Ajouter Enseignant'}
+                        </Button>
+                      </Grid>
                     </Grid>
-                    <Grid item xs={12}>
-                      <Button 
-                        type="submit" 
-                        variant="contained" 
-                        color="primary" 
-                        size="large"
-                        fullWidth
-                        disabled={submitLoading}
-                        startIcon={submitLoading ? <CircularProgress size={24} /> : <Person />}
-                      >
-                        {submitLoading ? 'Ajout en cours...' : 'Ajouter Enseignant'}
-                      </Button>
-                    </Grid>
-                  </Grid>
-                </form>
-              </CardContent>
-            </Card>
+                  </form>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-        </Grid>
+        </Box>
       </Box>
 
       {/* Snackbar pour afficher le message de succès */}
