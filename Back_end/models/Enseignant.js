@@ -7,7 +7,7 @@ const enseignantSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
  matiere: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Matiere'
+    ref: 'Enseignant'
   }],  telephone: { type: String, required: false },
   dateCreation: { type: Date, default: Date.now },
 });
