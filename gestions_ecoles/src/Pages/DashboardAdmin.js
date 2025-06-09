@@ -43,37 +43,46 @@ const DashboardAdmin = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-  const API_URLS = {
-    eleves: "https://mes-sites.onrender.com/api/eleves",
-    enseignants: "https://mes-sites.onrender.com/api/enseignants/listes",
-    notes: "https://mes-sites.onrender.com/api/notes",
-    matieres: "https://mes-sites.onrender.com/api/matieres"
-  };
+const API_URLS = {
+  eleves: "https://mes-sites.onrender.com/api/eleves",
+  enseignants: "https://mes-sites.onrender.com/api/enseignants/listes", // Notez le '/listes'
+  notes: "https://mes-sites.onrender.com/api/notes",
+  matieres: "https://mes-sites.onrender.com/api/matieres"
+};
 
-  const fetchAllData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
-        axios.get(`${API_URLS.eleves}?populate=classe`),
-        axios.get(`${API_URLS.enseignants}?populate=matiere`),
-        axios.get(`${API_URLS.notes}?populate=eleve,matiere`),
-        axios.get(`${API_URLS.matieres}?populate=enseignants`)
-      ]);
-      
-      setEleves(elevesRes.data);
-      setEnseignants(enseignantsRes.data);
-      setNotes(notesRes.data);
-      setMatieres(matieresRes.data);
-    } catch (error) {
-      console.error('Erreur API:', error);
-      setError('Erreur lors de la récupération des données');
-    } finally {
-      setLoading(false);
+const fetchAllData = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    
+    const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
+      axios.get(`${API_URLS.eleves}?populate=classe`),
+      axios.get(`${API_URLS.enseignants}?populate=matiere`),
+      axios.get(`${API_URLS.notes}?populate=eleve,matiere`),
+      axios.get(`${API_URLS.matieres}?populate=enseignants`)
+    ]);
+    
+    // Accès correct aux données selon la structure de votre API
+    setEleves(elevesRes.data.data || []);
+    setEnseignants(enseignantsRes.data.data || []);
+    setNotes(notesRes.data.data || []);
+    setMatieres(matieresRes.data.data || []);
+  } catch (error) {
+    console.error('Erreur API:', error);
+    setError('Erreur lors de la récupération des données');
+    
+    // Pour débogage - affichez la réponse d'erreur complète
+    if (error.response) {
+      console.error('Détails erreur:', {
+        status: error.response.status,
+        data: error.response.data,
+        headers: error.response.headers
+      });
     }
-  };
-
+  } finally {
+    setLoading(false);
+  }
+};
   useEffect(() => {
     fetchAllData();
   }, []);

@@ -79,7 +79,7 @@ exports.createEnseignant = async (req, res) => {
   }
 };
 
-// Récupérer tous les enseignants
+// Dans votre contrôleur enseignants
 exports.getAllEnseignants = async (req, res) => {
   try {
     const enseignants = await Enseignant.find().populate({
@@ -90,11 +90,13 @@ exports.getAllEnseignants = async (req, res) => {
     
     res.status(200).json({
       success: true,
+      count: enseignants.length,
       data: enseignants
     });
   } catch (error) {
     res.status(500).json({ 
       success: false,
+      message: "Erreur serveur",
       error: error.message 
     });
   }
