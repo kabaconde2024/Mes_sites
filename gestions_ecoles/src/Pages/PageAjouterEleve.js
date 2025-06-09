@@ -211,7 +211,10 @@ const PageAjouterEleve = () => {
                 boxShadow: { xs: 'none', sm: theme.shadows[3] },
                 overflow: 'hidden'
               }}>
-                <CardContent sx={{ p: { xs: 1, sm: 2, md: 3 } }}>
+                <CardContent sx={{ 
+                  p: { xs: 1, sm: 2, md: 3 },
+                  '& .MuiTextField-root': { mb: { xs: 1, sm: 2 } } // Consistent spacing
+                }}>
                   <Typography 
                     variant={isMobile ? 'h6' : 'h5'} 
                     gutterBottom 
@@ -362,6 +365,7 @@ const PageAjouterEleve = () => {
                             value={formData.classe}
                             onChange={handleChange}
                             disabled={loadingClasses}
+                            sx={{ mb: { xs: 1, sm: 0 } }}
                           >
                             {loadingClasses ? (
                               <MenuItem value="">
@@ -388,6 +392,7 @@ const PageAjouterEleve = () => {
                             name="statut"
                             value={formData.statut}
                             onChange={handleChange}
+                            sx={{ mb: { xs: 1, sm: 0 } }}
                           >
                             <MenuItem value="actif">
                               <CheckCircle color="success" sx={{ mr: 1 }} fontSize={isMobile ? 'small' : 'medium'} />

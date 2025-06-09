@@ -83,7 +83,7 @@ const SidebarAdmin = () => {
             color: '#fff',
             height: isMobile ? '100vh' : 'calc(100vh - 64px)',
             top: isMobile ? 0 : '64px',
-            overflowY: 'auto', // Ensure scrollability
+            overflowY: 'auto',
             transition: theme.transitions.create('width', {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,

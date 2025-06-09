@@ -106,7 +106,11 @@ const DashboardAdmin = () => {
           mt: 2, 
           boxShadow: 3,
           maxWidth: '100%',
-          overflowX: 'auto'
+          overflowX: 'auto', // Enable horizontal scrolling on mobile
+          '& .MuiTableCell-root': {
+            padding: { xs: '4px', sm: '8px' }, // Reduced padding on mobile
+            fontSize: { xs: '0.75rem', sm: '0.875rem' }
+          }
         }}
       >
         <Table sx={{ minWidth: isMobile ? 300 : 650 }}>
@@ -117,7 +121,11 @@ const DashboardAdmin = () => {
                   key={col.field} 
                   sx={{ 
                     fontWeight: 'bold',
-                    whiteSpace: 'nowrap'
+                    whiteSpace: 'nowrap',
+                    display: { 
+                      xs: col.field === 'email' || col.field === 'statut' ? 'table-cell' : 'none', // Show only key columns on mobile
+                      sm: 'table-cell'
+                    }
                   }}
                 >
                   {col.headerName}
@@ -135,7 +143,11 @@ const DashboardAdmin = () => {
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
-                      maxWidth: isMobile ? '150px' : 'none'
+                      maxWidth: isMobile ? '120px' : 'none',
+                      display: { 
+                        xs: col.field === 'email' || col.field === 'statut' ? 'table-cell' : 'none',
+                        sm: 'table-cell'
+                      }
                     }}
                   >
                     {col.valueGetter ? col.valueGetter(row) : row[col.field]}
@@ -163,7 +175,7 @@ const DashboardAdmin = () => {
         
         <Box component="main" sx={{ 
           flexGrow: 1, 
-          p: { xs: 1, sm: 3 },
+          p: { xs: 1, sm: 2, md: 3 },
           ml: { sm: '240px' },
           width: { sm: 'calc(100% - 240px)' },
           overflowY: 'auto'
@@ -185,6 +197,8 @@ const DashboardAdmin = () => {
             variant={isMobile ? 'scrollable' : 'standard'}
             scrollButtons="auto"
             allowScrollButtonsMobile
+            textColor="primary"
+            indicatorColor="primary"
           >
             <Tab label={isMobile ? "Élèves" : "Liste des Élèves"} icon={<PeopleIcon />} />
             <Tab label={isMobile ? "Enseignants" : "Liste des Enseignants"} icon={<PeopleIcon />} />
