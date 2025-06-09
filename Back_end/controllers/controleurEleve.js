@@ -97,15 +97,64 @@ exports.ajouterEleve = async (req, res) => {
   }
 };
 
-  exports.obtenirTousLesEleves = async (req, res) => {
-    try {
-      const eleves = await Eleve.find().populate('classe'); // Inclure la classe référencée
-      res.json(eleves);
-    } catch (err) {
-      res.status(500).json({ message: "Erreur lors de la récupération des élèves.", error: err });
+ exports.obtenirTousLesEleves = async (req, res) => {
+  try {
+    // 1. Construction de la requête de base
+    let query = Eleve.find()
+      .populate({
+        path: 'classe',
+        select: 'nom niveau', // Seulement les champs nécessaires
+        options: { lean: true } // Optimisation des performances
+      })
+      .lean(); // Conversion en objets JavaScript simples pour meilleure performance
+
+    // 2. Option pour peupler les utilisateurs associés (si nécessaire)
+    if (req.query.populateUtilisateur === 'true') {
+      query = query.populate({
+        path: 'utilisateurId',
+        select: 'nomUtilisateur statut',
+        match: { statut: 'actif' } // Seulement les utilisateurs actifs
+      });
     }
-  };
-  
+
+    // 3. Exécution de la requête
+    const eleves = await query.exec();
+
+    // 4. Formatage des données avant envoi
+    const elevesFormates = eleves.map(eleve => ({
+      ...eleve,
+      // Ajout d'un champ calculé pour le nom complet
+      nomComplet: `${eleve.prenom} ${eleve.nom}`.trim(),
+      // Gestion propre des classes non attribuées
+      classe: eleve.classe || { nom: 'Non attribué', niveau: '' }
+    }));
+
+    // 5. Envoi de la réponse
+    res.json({
+      success: true,
+      count: elevesFormates.length,
+      data: elevesFormates
+    });
+
+  } catch (err) {
+    console.error('Erreur lors de la récupération des élèves:', err);
+    
+    // Gestion plus fine des erreurs
+    let statusCode = 500;
+    let message = "Erreur serveur lors de la récupération des élèves";
+    
+    if (err.name === 'CastError') {
+      statusCode = 400;
+      message = "Format de requête invalide";
+    }
+
+    res.status(statusCode).json({ 
+      success: false,
+      message,
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined
+    });
+  }
+};
   // Obtenir un élève par ID
   exports.obtenirEleveParId = async (req, res) => {
     try {
