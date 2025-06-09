@@ -61,29 +61,30 @@ const Accueil = () => {
           sx={{ 
             bgcolor: theme.palette.primary.main,
             color: 'white',
-            py: { xs: 6, sm: 8 },
-            textAlign: 'center'
+            py: { xs: 4, sm: 6, md: 8 },
+            textAlign: 'center',
+            px: { xs: 2, sm: 0 }
           }}
         >
           <Container maxWidth="md">
             <Typography 
-              variant={isMobile ? 'h3' : 'h2'} 
+              variant={isMobile ? 'h4' : 'h2'} 
               component="h1" 
               gutterBottom 
               sx={{ 
                 fontWeight: 700,
-                fontSize: isMobile ? '2rem' : isTablet ? '2.5rem' : '3rem'
+                fontSize: { xs: '1.5rem', sm: '2rem', md: '3rem' }
               }}
             >
               Bienvenue sur EduManage
             </Typography>
             <Typography 
-              variant={isMobile ? 'body1' : 'h5'} 
+              variant={isMobile ? 'body1' : 'h6'} 
               component="p" 
               gutterBottom 
               sx={{ 
-                mb: 4,
-                fontSize: isMobile ? '1rem' : '1.25rem'
+                mb: { xs: 2, sm: 4 },
+                fontSize: { xs: '0.9rem', sm: '1rem', md: '1.25rem' }
               }}
             >
               La plateforme de gestion scolaire complète pour l'ISMG
@@ -95,9 +96,9 @@ const Accueil = () => {
               endIcon={<ArrowForward />}
               onClick={() => navigate('/formation')}
               sx={{ 
-                px: { xs: 3, sm: 4 },
+                px: { xs: 2, sm: 3, md: 4 },
                 py: { xs: 1, sm: 1.5 },
-                fontSize: isMobile ? '0.9rem' : '1.1rem'
+                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1.1rem' }
               }}
             >
               Découvrir nos formations
@@ -106,7 +107,7 @@ const Accueil = () => {
         </Box>
 
         {/* Features Section */}
-        <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 8 } }}>
+        <Container maxWidth="lg" sx={{ py: { xs: 4, sm: 6, md: 8 } }}>
           <Typography 
             variant={isMobile ? 'h5' : 'h4'} 
             component="h2" 
@@ -114,8 +115,8 @@ const Accueil = () => {
             gutterBottom 
             sx={{ 
               fontWeight: 600, 
-              mb: { xs: 4, sm: 6 },
-              fontSize: isMobile ? '1.5rem' : '2rem'
+              mb: { xs: 2, sm: 4 },
+              fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }
             }}
           >
             Nos Fonctionnalités
@@ -151,7 +152,7 @@ const Accueil = () => {
                       gutterBottom 
                       sx={{ 
                         fontWeight: 600,
-                        fontSize: isMobile ? '1rem' : '1.25rem'
+                        fontSize: { xs: '1rem', sm: '1.1rem', md: '1.25rem' }
                       }}
                     >
                       {feature.title}
@@ -160,7 +161,7 @@ const Accueil = () => {
                       variant="body2" 
                       color="text.secondary"
                       sx={{
-                        fontSize: isMobile ? '0.875rem' : '1rem'
+                        fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }
                       }}
                     >
                       {feature.description}
@@ -176,8 +177,9 @@ const Accueil = () => {
         <Box 
           sx={{ 
             bgcolor: theme.palette.grey[100],
-            py: { xs: 6, sm: 8 },
-            textAlign: 'center'
+            py: { xs: 4, sm: 6, md: 8 },
+            textAlign: 'center',
+            px: { xs: 2, sm: 0 }
           }}
         >
           <Container maxWidth="md">
@@ -187,8 +189,8 @@ const Accueil = () => {
               gutterBottom 
               sx={{ 
                 fontWeight: 600, 
-                mb: 3,
-                fontSize: isMobile ? '1.5rem' : '2rem'
+                mb: { xs: 2, sm: 3 },
+                fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }
               }}
             >
               Prêt à transformer votre expérience scolaire ?
@@ -199,9 +201,9 @@ const Accueil = () => {
               size={isMobile ? 'medium' : 'large'}
               onClick={() => navigate('/contact')}
               sx={{ 
-                px: { xs: 4, sm: 6 },
+                px: { xs: 2, sm: 4, md: 6 },
                 py: { xs: 1, sm: 1.5 },
-                fontSize: isMobile ? '0.9rem' : '1.1rem'
+                fontSize: { xs: '0.85rem', sm: '0.9rem', md: '1.1rem' }
               }}
             >
               Nous contacter
