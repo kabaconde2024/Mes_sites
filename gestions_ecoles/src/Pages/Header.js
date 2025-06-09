@@ -74,67 +74,71 @@ const Header = () => {
         boxShadow: 'none',
       }}
     >
-      <Toolbar sx={{ justifyContent: 'space-between' }}>
-        {/* Left Side - Logo and Navigation */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          {/* Mobile Menu Button */}
-          {isMobile && (
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="menu"
-              onClick={handleMobileMenuToggle}
-              sx={{ mr: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
+      <Toolbar>
+        {/* Logo (Left) */}
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            fontWeight: 600,
+            whiteSpace: 'nowrap',
+            mr: { xs: 0, md: 4 }
+          }}
+        >
+          EduManage
+        </Typography>
 
-          {/* Logo */}
-          <Typography 
-            variant="h6" 
-            sx={{ 
-              fontWeight: 600,
-              mr: { xs: 0, md: 4 },
-              whiteSpace: 'nowrap'
-            }}
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            onClick={handleMobileMenuToggle}
+            sx={{ ml: 'auto', mr: 2 }}
           >
-            EduManage
-          </Typography>
+            <MenuIcon />
+          </IconButton>
+        )}
 
-          {/* Desktop Navigation */}
-          {!isMobile && (
-            <Box sx={{ display: 'flex' }}>
-              {navLinks.map((link, index) => (
-                link.submenu ? (
-                  <Button
-                    key={index}
-                    color="inherit"
-                    sx={{ mx: 1 }}
-                    onClick={handleInstitutionMenuOpen}
-                    aria-controls="institution-menu"
-                    aria-haspopup="true"
-                    endIcon={<ArrowDropDown />}
-                  >
-                    {link.label}
-                  </Button>
-                ) : (
-                  <Button
-                    key={index}
-                    color="inherit"
-                    sx={{ mx: 1 }}
-                    onClick={() => window.location.href = link.href}
-                  >
-                    {link.label}
-                  </Button>
-                )
-              ))}
-            </Box>
-          )}
-        </Box>
+        {/* Centered Navigation (Desktop) */}
+        {!isMobile && (
+          <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'center',
+            flexGrow: 1,
+            position: 'absolute',
+            left: '50%',
+            transform: 'translateX(-50%)'
+          }}>
+            {navLinks.map((link, index) => (
+              link.submenu ? (
+                <Button
+                  key={index}
+                  color="inherit"
+                  sx={{ mx: 1 }}
+                  onClick={handleInstitutionMenuOpen}
+                  aria-controls="institution-menu"
+                  aria-haspopup="true"
+                  endIcon={<ArrowDropDown />}
+                >
+                  {link.label}
+                </Button>
+              ) : (
+                <Button
+                  key={index}
+                  color="inherit"
+                  sx={{ mx: 1 }}
+                  onClick={() => window.location.href = link.href}
+                >
+                  {link.label}
+                </Button>
+              )
+            ))}
+          </Box>
+        )}
 
-        {/* Right Side - Profile */}
-        <Box>
+        {/* Profile (Right) */}
+        <Box sx={{ marginLeft: 'auto' }}>
           <IconButton
             aria-label="account of current user"
             aria-controls="menu-appbar"
