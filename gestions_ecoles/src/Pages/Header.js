@@ -100,15 +100,12 @@ const Header = () => {
           </IconButton>
         )}
 
-        {/* Centered Navigation (Desktop) */}
+        {/* Navigation Links (Right) */}
         {!isMobile && (
           <Box sx={{ 
             display: 'flex', 
-            justifyContent: 'center',
-            flexGrow: 1,
-            position: 'absolute',
-            left: '50%',
-            transform: 'translateX(-50%)'
+            alignItems: 'center',
+            marginLeft: 'auto'
           }}>
             {navLinks.map((link, index) => (
               link.submenu ? (
@@ -134,26 +131,25 @@ const Header = () => {
                 </Button>
               )
             ))}
+
+            {/* Profile */}
+            <IconButton
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+              sx={{
+                ml: 1,
+                '&:hover': {
+                  backgroundColor: 'rgba(255, 255, 255, 0.1)'
+                }
+              }}
+            >
+              <AccountCircle />
+            </IconButton>
           </Box>
         )}
-
-        {/* Profile (Right) */}
-        <Box sx={{ marginLeft: 'auto' }}>
-          <IconButton
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            color="inherit"
-            sx={{
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)'
-              }
-            }}
-          >
-            <AccountCircle />
-          </IconButton>
-        </Box>
 
         {/* Institution Submenu */}
         <Popover
