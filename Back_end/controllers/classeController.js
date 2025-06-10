@@ -22,7 +22,6 @@ exports.createClasse = async (req, res) => {
     if (matieres && matieres.length > 0) {
       for (const matiere of matieres) {
         const matiereExistante = await Matiere.findById(matiere.matiere);
-        const enseignantExist = await Enseignant.findById(matiere.enseignant);
         
         if (!matiereExistante || !enseignantExist) {
           return res.status(404).json({ 

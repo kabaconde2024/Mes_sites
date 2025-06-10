@@ -55,22 +55,30 @@ const CreerClasse = () => {
       try {
         setLoading(prev => ({ ...prev, enseignants: true, matieres: true }));
         
-        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/enseignants/listes', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-        setEnseignants(enseignantsResponse.data);
-
+        // Fetch matieres
         const matieresResponse = await axios.get('https://mes-sites.onrender.com/api/matieres', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
         });
-        setMatieres(matieresResponse.data);
+        // Ensure matieres is an array
+        setMatieres(Array.isArray(matieresResponse.data) ? matieresResponse.data : []);
+
+        // Fetch enseignants (assuming an endpoint exists)
+        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/enseignants', {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          }
+        });
+        // Ensure enseignants is an array
+        setEnseignants(Array.isArray(enseignantsResponse.data) ? enseignantsResponse.data : []);
+
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
         setErrorMessage('Erreur lors du chargement des données');
+        // Set empty arrays on error to prevent map errors
+        setMatieres([]);
+        setEnseignants([]);
       } finally {
         setLoading(prev => ({ ...prev, enseignants: false, matieres: false }));
       }
@@ -127,43 +135,43 @@ const CreerClasse = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  
-  if (!validateForm()) return;
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
 
-  try {
-    // Préparer les données à envoyer
-    const dataToSend = {
-      nom: formData.nom,
-      niveau: formData.niveau,
-      matieres: formData.matieres.map(m => ({
-        matiere: m.matiere,
-        enseignant: m.enseignant
-      }))
-    };
+    try {
+      const dataToSend = {
+        nom: formData.nom,
+        niveau: formData.niveau,
+        matieres: formData.matieres.map(m => ({
+          matiere: m.matiere,
+          enseignant: m.enseignant
+        }))
+      };
 
-    const response = await axios.post('https://mes-sites.onrender.com/api/classes', dataToSend, {
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        'Content-Type': 'application/json'
+      const response = await axios.post('https://mes-sites.onrender.com/api/classes', dataToSend, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 201) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/CreerClasse');
+        }, 2000);
       }
-    });
-
-    if (response.status === 201) {
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/CreerClasse');
-      }, 2000);
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || 'Erreur lors de la création de la classe');
     }
-  } catch (error) {
-    setErrorMessage(error.response?.data?.message || 'Erreur lors de la création de la classe');
-  }
-};
+  };
+
   return (
     <Box sx={{ display: 'flex', flex: 1, pt: '64px', height: 'calc(100vh - 64px)' }}>
       <Header />    
-        <SidebarAdmin />
+      <SidebarAdmin />
       
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Typography variant="h4" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
@@ -189,7 +197,6 @@ const handleSubmit = async (e) => {
           <CardContent>
             <form onSubmit={handleSubmit}>
               <Grid container spacing={3}>
-                {/* Nom de la classe */}
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
@@ -209,7 +216,6 @@ const handleSubmit = async (e) => {
                   />
                 </Grid>
 
-                {/* Niveau de la classe */}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth error={!!errors.niveau}>
                     <InputLabel>Niveau</InputLabel>
@@ -238,7 +244,6 @@ const handleSubmit = async (e) => {
                   </FormControl>
                 </Grid>
 
-                {/* Liste des matières */}
                 <Grid item xs={12}>
                   <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center' }}>
                     <Book sx={{ mr: 1 }} />
@@ -261,12 +266,18 @@ const handleSubmit = async (e) => {
                                 <CircularProgress size={24} />
                               </MenuItem>
                             ) : (
-                              matieres.map((mat) => (
-                                <MenuItem key={mat._id} value={mat._id}>
-                                  <Book sx={{ mr: 1 }} fontSize="small" />
-                                  {mat.nom} (Coef: {mat.coefficient})
+                              Array.isArray(matieres) && matieres.length > 0 ? (
+                                matieres.map((mat) => (
+                                  <MenuItem key={mat._id} value={mat._id}>
+                                    <Book sx={{ mr: 1 }} fontSize="small" />
+                                    {mat.nom} (Coef: {mat.coefficient})
+                                  </MenuItem>
+                                ))
+                              ) : (
+                                <MenuItem value="" disabled>
+                                  Aucune matière disponible
                                 </MenuItem>
-                              ))
+                              )
                             )}
                           </Select>
                           {errors[`matiere-${index}`] && (
@@ -290,12 +301,18 @@ const handleSubmit = async (e) => {
                                 <CircularProgress size={24} />
                               </MenuItem>
                             ) : (
-                              enseignants.map((ens) => (
-                                <MenuItem key={ens._id} value={ens._id}>
-                                  <Person sx={{ mr: 1 }} fontSize="small" />
-                                  {ens.nom} {ens.prenom}
+                              Array.isArray(enseignants) && enseignants.length > 0 ? (
+                                enseignants.map((ens) => (
+                                  <MenuItem key={ens._id} value={ens._id}>
+                                    <Person sx={{ mr: 1 }} fontSize="small" />
+                                    {ens.nom} {ens.prenom}
+                                  </MenuItem>
+                                ))
+                              ) : (
+                                <MenuItem value="" disabled>
+                                  Aucun enseignant disponible
                                 </MenuItem>
-                              ))
+                              )
                             )}
                           </Select>
                           {errors[`enseignant-${index}`] && (
@@ -330,7 +347,6 @@ const handleSubmit = async (e) => {
                   </Button>
                 </Grid>
 
-                {/* Boutons de soumission */}
                 <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-start' }}>
                   <Button
                     type="submit"

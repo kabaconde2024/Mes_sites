@@ -11,16 +11,16 @@ const classeSchema = new mongoose.Schema({
     required: true,
     enum: ['6ème', '5ème', '4ème', '3ème', '2nde', '1ère', 'Terminale']
   },
-  matieres: [{
-    matiere: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Matiere'
-    },
-    enseignant: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Enseignant'
-    }
-  }],
+ matieres: [{
+  matiere: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Matiere'
+  },
+  enseignant: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Enseignant'
+  }
+}],
   createdAt: {
     type: Date,
     default: Date.now

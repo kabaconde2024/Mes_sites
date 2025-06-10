@@ -82,26 +82,12 @@ exports.createEnseignant = async (req, res) => {
 // Dans votre contrôleur enseignants
 exports.getAllEnseignants = async (req, res) => {
   try {
-    const enseignants = await Enseignant.find().populate({
-      path: 'matiere',
-      select: 'nom coefficient',
-      options: { lean: true }
-    });
-    
-    res.status(200).json({
-      success: true,
-      count: enseignants.length,
-      data: enseignants
-    });
+    const enseignants = await Enseignant.find().select('nom prenom email');
+    res.status(200).json(enseignants);
   } catch (error) {
-    res.status(500).json({ 
-      success: false,
-      message: "Erreur serveur",
-      error: error.message 
-    });
+    res.status(500).json({ message: error.message });
   }
 };
-
 // Récupérer un enseignant par ID
 exports.getEnseignantById = async (req, res) => {
   try {
