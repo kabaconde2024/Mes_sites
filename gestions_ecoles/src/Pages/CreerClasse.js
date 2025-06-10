@@ -65,7 +65,7 @@ const CreerClasse = () => {
         setMatieres(Array.isArray(matieresResponse.data) ? matieresResponse.data : []);
 
         // Fetch enseignants (assuming an endpoint exists)
-        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/enseignants', {
+        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/listes', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
