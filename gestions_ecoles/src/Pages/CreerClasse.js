@@ -136,44 +136,55 @@ const CreerClasse = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  if (!validateForm()) return;
+
+  try {
+    const token = localStorage.getItem('token');
+    // Vérification supplémentaire des données
+    const isValidData = formData.matieres.every(m => 
+      m.matiere && m.enseignant && 
+      matieres.some(mat => mat._id === m.matiere || mat.id === m.matiere) &&
+      enseignants.some(ens => ens._id === m.enseignant || ens.id === m.enseignant)
+    );
     
-    if (!validateForm()) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      const dataToSend = {
-        nom: formData.nom,
-        niveau: formData.niveau,
-        matieres: formData.matieres.map(m => ({
-          matiere: m.matiere,
-          enseignant: m.enseignant
-        }))
-      };
-
-      const response = await axios.post('https://mes-sites.onrender.com/api/classes', dataToSend, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      if (response.status === 201) {
-        setSuccess(true);
-        setTimeout(() => {
-          navigate('/classes');
-        }, 2000);
-      }
-    } catch (error) {
-      console.error('Erreur création classe:', error);
-      setErrorMessage(
-        error.response?.data?.message || 
-        error.message || 
-        'Erreur lors de la création de la classe'
-      );
+    if (!isValidData) {
+      throw new Error('Données invalides: vérifiez les matières et enseignants sélectionnés');
     }
-  };
+
+    const dataToSend = {
+      nom: formData.nom,
+      niveau: formData.niveau,
+      matieres: formData.matieres.map(m => ({
+        matiere: m.matiere,
+        enseignant: m.enseignant
+      }))
+    };
+
+    const response = await axios.post('https://mes-sites.onrender.com/api/classes', dataToSend, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.status === 201) {
+      setSuccess(true);
+      setTimeout(() => {
+        navigate('/classes');
+      }, 2000);
+    }
+  } catch (error) {
+    console.error('Erreur création classe:', error);
+    setErrorMessage(
+      error.response?.data?.message || 
+      error.message || 
+      'Erreur lors de la création de la classe'
+    );
+  }
+};
 
   return (
     <Box sx={{ display: 'flex', flex: 1, pt: '64px', height: 'calc(100vh - 64px)' }}>

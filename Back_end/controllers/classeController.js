@@ -21,11 +21,19 @@ exports.createClasse = async (req, res) => {
     // Vérifier les matières
     if (matieres && matieres.length > 0) {
       for (const matiere of matieres) {
+        // Vérifier que la matière existe
         const matiereExistante = await Matiere.findById(matiere.matiere);
-        
-        if (!matiereExistante || !enseignantExist) {
+        if (!matiereExistante) {
           return res.status(404).json({ 
-            message: 'Matière ou enseignant non trouvé' 
+            message: `Matière avec ID ${matiere.matiere} non trouvée` 
+          });
+        }
+
+        // Vérifier que l'enseignant existe
+        const enseignantExist = await Enseignant.findById(matiere.enseignant);
+        if (!enseignantExist) {
+          return res.status(404).json({ 
+            message: `Enseignant avec ID ${matiere.enseignant} non trouvé` 
           });
         }
       }
@@ -40,7 +48,10 @@ exports.createClasse = async (req, res) => {
     await nouvelleClasse.save();
     res.status(201).json(nouvelleClasse);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ 
+      message: 'Erreur lors de la création de la classe',
+      error: error.message 
+    });
   }
 };
 
