@@ -43,46 +43,46 @@ const DashboardAdmin = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.between('sm', 'md'));
 
-const API_URLS = {
-  eleves: "https://mes-sites.onrender.com/api/eleves",
-  enseignants: "https://mes-sites.onrender.com/api/enseignants/listes", // Notez le '/listes'
-  notes: "https://mes-sites.onrender.com/api/notes",
-  matieres: "https://mes-sites.onrender.com/api/matieres"
-};
+  const API_URLS = {
+    eleves: "https://mes-sites.onrender.com/api/eleves",
+    enseignants: "https://mes-sites.onrender.com/api/enseignants/listes",
+    notes: "https://mes-sites.onrender.com/api/notes",
+    matieres: "https://mes-sites.onrender.com/api/matieres"
+  };
 
-const fetchAllData = async () => {
-  try {
-    setLoading(true);
-    setError(null);
-    
-    const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
-      axios.get(`${API_URLS.eleves}?populate=classe`),
-      axios.get(`${API_URLS.enseignants}?populate=matiere`),
-      axios.get(`${API_URLS.notes}?populate=eleve,matiere`),
-      axios.get(`${API_URLS.matieres}?populate=enseignants`)
-    ]);
-    
-    // Accès correct aux données selon la structure de votre API
-    setEleves(elevesRes.data.data || []);
-    setEnseignants(enseignantsRes.data.data || []);
-    setNotes(notesRes.data.data || []);
-    setMatieres(matieresRes.data.data || []);
-  } catch (error) {
-    console.error('Erreur API:', error);
-    setError('Erreur lors de la récupération des données');
-    
-    // Pour débogage - affichez la réponse d'erreur complète
-    if (error.response) {
-      console.error('Détails erreur:', {
-        status: error.response.status,
-        data: error.response.data,
-        headers: error.response.headers
-      });
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const [elevesRes, enseignantsRes, notesRes, matieresRes] = await Promise.all([
+        axios.get(API_URLS.eleves, { params: { populate: 'classe' } }),
+        axios.get(API_URLS.enseignants, { params: { populate: 'matiere' } }),
+        axios.get(API_URLS.notes, { params: { populate: 'eleve,matiere' } }),
+        axios.get(API_URLS.matieres, { params: { populate: 'enseignants' } })
+      ]);
+      
+      // Modification ici pour gérer les différentes structures de réponse
+      setEleves(elevesRes.data?.data || elevesRes.data || []);
+      setEnseignants(enseignantsRes.data?.data || enseignantsRes.data || []);
+      setNotes(notesRes.data?.data || notesRes.data || []);
+      setMatieres(matieresRes.data?.data || matieresRes.data || []);
+    } catch (error) {
+      console.error('Erreur API:', error);
+      setError('Erreur lors de la récupération des données');
+      
+      if (error.response) {
+        console.error('Détails erreur:', {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   useEffect(() => {
     fetchAllData();
   }, []);
@@ -115,9 +115,9 @@ const fetchAllData = async () => {
           mt: 2, 
           boxShadow: 3,
           maxWidth: '100%',
-          overflowX: 'auto', // Enable horizontal scrolling on mobile
+          overflowX: 'auto',
           '& .MuiTableCell-root': {
-            padding: { xs: '4px', sm: '8px' }, // Reduced padding on mobile
+            padding: { xs: '4px', sm: '8px' },
             fontSize: { xs: '0.75rem', sm: '0.875rem' }
           }
         }}
@@ -132,7 +132,7 @@ const fetchAllData = async () => {
                     fontWeight: 'bold',
                     whiteSpace: 'nowrap',
                     display: { 
-                      xs: col.field === 'email' || col.field === 'statut' ? 'table-cell' : 'none', // Show only key columns on mobile
+                      xs: col.field === 'email' || col.field === 'statut' ? 'table-cell' : 'none',
                       sm: 'table-cell'
                     }
                   }}
@@ -144,10 +144,10 @@ const fetchAllData = async () => {
           </TableHead>
           <TableBody>
             {data.map((row) => (
-              <TableRow key={row._id} hover>
+              <TableRow key={row._id || row.id} hover>
                 {columns.map((col) => (
                   <TableCell 
-                    key={`${row._id}-${col.field}`}
+                    key={`${row._id || row.id}-${col.field}`}
                     sx={{
                       whiteSpace: 'nowrap',
                       overflow: 'hidden',
@@ -237,15 +237,19 @@ const fetchAllData = async () => {
                 { field: 'nom', headerName: 'Nom' },
                 { field: 'prenom', headerName: 'Prénom' },
                 { field: 'email', headerName: 'Email' },
-               { 
-  field: 'classe', 
-  headerName: 'Classes', 
-  valueGetter: (row) => {
-    return row.classe?.length > 0 
-      ? row.classe.map(c => c.nom).join(', ') 
-      : 'Non attribué';
-  }
-},
+                { 
+                  field: 'classe', 
+                  headerName: 'Classe', 
+                  valueGetter: (row) => {
+                    // Gestion des différentes structures de réponse
+                    if (Array.isArray(row.classe)) {
+                      return row.classe.length > 0 
+                        ? row.classe.map(c => c.nom).join(', ') 
+                        : 'Non attribué';
+                    }
+                    return row.classe?.nom || 'Non attribué';
+                  }
+                },
                 { 
                   field: 'statut', 
                   headerName: 'Statut', 
@@ -281,15 +285,20 @@ const fetchAllData = async () => {
                 { field: 'nom', headerName: 'Nom' },
                 { field: 'prenom', headerName: 'Prénom' },
                 { field: 'email', headerName: 'Email' },
-              { 
-  field: 'matiere', 
-  headerName: 'Matières', 
-  valueGetter: (row) => {
-    return row.matiere?.length > 0 
-      ? row.matiere.map(m => m.nom).join(', ') 
-      : 'Non assigné';
-  }
-}
+                { 
+                  field: 'matiere', 
+                  headerName: 'Matières', 
+                  valueGetter: (row) => {
+                    // Gestion des différentes structures de réponse
+                    if (Array.isArray(row.matiere)) {
+                      return row.matiere.length > 0 
+                        ? row.matiere.map(m => m.nom).join(', ') 
+                        : 'Non assigné';
+                    }
+                    return row.matiere?.nom || row.matiere || 'Non assigné';
+                  }
+                },
+                { field: 'telephone', headerName: 'Téléphone' }
               ])}
             </Box>
           )}
@@ -317,9 +326,14 @@ const fetchAllData = async () => {
                 { 
                   field: 'enseignants', 
                   headerName: 'Enseignants', 
-                  valueGetter: (row) => (
-                    row.enseignants?.map(e => `${e.nom} ${e.prenom}`).join(', ') || 'Aucun'
-                  )
+                  valueGetter: (row) => {
+                    if (Array.isArray(row.enseignants)) {
+                      return row.enseignants.length > 0
+                        ? row.enseignants.map(e => `${e.nom} ${e.prenom}`).join(', ')
+                        : 'Aucun';
+                    }
+                    return 'Aucun';
+                  }
                 }
               ])}
             </Box>
@@ -345,7 +359,12 @@ const fetchAllData = async () => {
                 { 
                   field: 'eleve', 
                   headerName: 'Élève', 
-                  valueGetter: (row) => `${row.eleve?.nom} ${row.eleve?.prenom}` || 'Inconnu' 
+                  valueGetter: (row) => {
+                    if (row.eleve) {
+                      return `${row.eleve.nom} ${row.eleve.prenom}`;
+                    }
+                    return 'Inconnu';
+                  }
                 },
                 { 
                   field: 'matiere', 
