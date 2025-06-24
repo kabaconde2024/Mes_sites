@@ -36,27 +36,32 @@ const fetchEleves = async () => {
       headers: {  
         Authorization: `Bearer ${token}`,  
       },  
+      timeout: 10000 // 10 secondes timeout
     });
     
-    // Vérifiez la structure de la réponse
-    const receivedData = response.data?.data || response.data;
-    
-    if (!Array.isArray(receivedData)) {
-      throw new Error('Format de données inattendu');
+    if (!response.data) {
+      throw new Error('Empty response from server');
     }
+    
+    const receivedData = Array.isArray(response.data) 
+      ? response.data 
+      : response.data.data || [];
     
     setEleves(receivedData);
     setError('');
     
   } catch (error) {  
-    console.error('Erreur:', {
+    console.error('Fetch error:', {
       message: error.message,
       response: error.response?.data,
       stack: error.stack
     });  
-    setError(error.response?.data?.message || error.message);  
+    setError(error.response?.data?.message || 
+            error.message || 
+            'Failed to load students');  
   }  
 };
+
   // Fonction pour supprimer un élève
   const handleDelete = async (id) => {
     const token = localStorage.getItem('token');
