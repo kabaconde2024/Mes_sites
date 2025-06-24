@@ -84,27 +84,31 @@ const Note = () => {
     periode: ""
   });
 
-  // Fetch data with improved error handling
+  // Fetch data with improved error handling and response structure handling
   const fetchData = async () => {
     try {
       setLoading(true);
       setError("");
       
-      // Fetch data sequentially for better error tracking
-      const notesRes = await axios.get("https://mes-sites.onrender.com/api/notes");
-      const elevesRes = await axios.get("https://mes-sites.onrender.com/api/eleves");
-      const matieresRes = await axios.get("https://mes-sites.onrender.com/api/matieres");
-      const enseignantsRes = await axios.get("https://mes-sites.onrender.com/api/enseignants/listes");
+      // Fetch all data in parallel
+      const [notesRes, elevesRes, matieresRes, enseignantsRes] = await Promise.all([
+        axios.get("https://mes-sites.onrender.com/api/notes"),
+        axios.get("https://mes-sites.onrender.com/api/eleves"),
+        axios.get("https://mes-sites.onrender.com/api/matieres"),
+        axios.get("https://mes-sites.onrender.com/api/enseignants/listes")
+      ]);
       
-      // Validate response data
-      if (!notesRes.data || !elevesRes.data || !matieresRes.data || !enseignantsRes.data) {
-        throw new Error("Données reçues invalides");
-      }
+      // Handle different response structures (data.data or just data)
+      setNotes(notesRes.data?.data || notesRes.data || []);
+      setEleves(elevesRes.data?.data || elevesRes.data || []);
+      setMatieres(matieresRes.data?.data || matieresRes.data || []);
+      setEnseignants(enseignantsRes.data?.data || enseignantsRes.data || []);
       
-      setNotes(notesRes.data);
-      setEleves(elevesRes.data);
-      setMatieres(matieresRes.data);
-      setEnseignants(enseignantsRes.data);
+      // Log data for debugging
+      console.log("Élèves chargés:", elevesRes.data?.data || elevesRes.data);
+      console.log("Matieres chargées:", matieresRes.data?.data || matieresRes.data);
+      console.log("Enseignants chargés:", enseignantsRes.data?.data || enseignantsRes.data);
+      
     } catch (err) {
       console.error("Erreur détaillée:", err.response || err);
       setError(`Erreur lors du chargement: ${err.message || "Veuillez vérifier votre connexion"}`);
@@ -171,7 +175,9 @@ const Note = () => {
         throw new Error("Réponse invalide du serveur");
       }
       
-      setNotes([...notes, res.data]);
+      // Handle both response structures
+      const newNote = res.data?.data || res.data;
+      setNotes([...notes, newNote]);
       setSuccess("Note ajoutée avec succès");
       setOpenCreateDialog(false);
       setFormData({
@@ -203,7 +209,9 @@ const Note = () => {
         throw new Error("Réponse invalide du serveur");
       }
       
-      setNotes(notes.map(note => note._id === currentNote._id ? res.data : note));
+      // Handle both response structures
+      const updatedNote = res.data?.data || res.data;
+      setNotes(notes.map(note => note._id === currentNote._id ? updatedNote : note));
       setSuccess("Note mise à jour avec succès");
       setOpenEditDialog(false);
     } catch (err) {
@@ -322,11 +330,15 @@ const Note = () => {
                 label="Élève"
               >
                 <MenuItem value="">Tous les élèves</MenuItem>
-                {Array.isArray(eleves) && eleves.map(eleve => (
-                  <MenuItem key={eleve._id} value={eleve._id}>
-                    {eleve.nom} {eleve.prenom}
-                  </MenuItem>
-                ))}
+                {Array.isArray(eleves) && eleves.length > 0 ? (
+                  eleves.map(eleve => (
+                    <MenuItem key={eleve._id} value={eleve._id}>
+                      {eleve.nom} {eleve.prenom}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>Aucun élève disponible</MenuItem>
+                )}
               </Select>
             </FormControl>
             
@@ -515,11 +527,15 @@ const Note = () => {
                   onChange={handleInputChange}
                   label="Élève *"
                 >
-                  {Array.isArray(eleves) && eleves.map(eleve => (
-                    <MenuItem key={eleve._id} value={eleve._id}>
-                      {eleve.nom} {eleve.prenom}
-                    </MenuItem>
-                  ))}
+                  {Array.isArray(eleves) && eleves.length > 0 ? (
+                    eleves.map(eleve => (
+                      <MenuItem key={eleve._id} value={eleve._id}>
+                        {eleve.nom} {eleve.prenom}
+                      </MenuItem>
+                    ))
+                  ) : (
+                    <MenuItem disabled>Aucun élève disponible</MenuItem>
+                  )}
                 </Select>
               </FormControl>
               

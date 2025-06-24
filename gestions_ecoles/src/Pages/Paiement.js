@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import {
-  Container,
   Typography,
   TextField,
   Button,
@@ -35,6 +35,7 @@ const AjoutPaiement = () => {
   const [eleves, setEleves] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
   const API_URL = "https://mes-sites.onrender.com/api/paiements";
   const API_ELEVES_URL = "https://mes-sites.onrender.com/api/eleves";
@@ -48,7 +49,6 @@ const AjoutPaiement = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
         
-        // Extraction correcte des données
         const elevesData = response.data?.data || response.data;
         
         if (Array.isArray(elevesData)) {
@@ -69,7 +69,6 @@ const AjoutPaiement = () => {
 
   const handleAddPaiement = async () => {
     try {
-      // Validation des champs
       if (!eleveId || !tranche || !montant || !anneeScolaire) {
         setError("Tous les champs sont obligatoires");
         return;
@@ -90,8 +89,13 @@ const AjoutPaiement = () => {
       if (response.status === 201) {
         setSuccess(true);
         clearForm();
-        setTimeout(() => setSuccess(false), 3000);
-        setError("");
+        
+        // Utilisation d'un setTimeout avec un cleanup dans le useEffect
+        const timer = setTimeout(() => {
+          navigate('/dashboardAdmin');
+        }, 2000);
+        
+        return () => clearTimeout(timer);
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || 
@@ -130,7 +134,7 @@ const AjoutPaiement = () => {
           {success && (
             <Alert severity="success" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
               <Check sx={{ mr: 1 }} />
-              Paiement ajouté avec succès!
+              Paiement ajouté avec succès! Redirection en cours...
             </Alert>
           )}
 
