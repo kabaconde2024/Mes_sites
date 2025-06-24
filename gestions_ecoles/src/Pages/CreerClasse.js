@@ -173,7 +173,7 @@ const handleSubmit = async (e) => {
     if (response.status === 201) {
       setSuccess(true);
       setTimeout(() => {
-        navigate('/classes');
+        navigate('/dashboardAdmin');
       }, 2000);
     }
   } catch (error) {

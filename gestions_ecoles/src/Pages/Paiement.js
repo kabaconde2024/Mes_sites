@@ -14,7 +14,7 @@ import {
   Select,
   FormControl,
   InputLabel,
-  Alert  // Ajout de l'import Alert
+  Alert
 } from "@mui/material";
 import {
   Person,
@@ -47,10 +47,21 @@ const AjoutPaiement = () => {
         const response = await axios.get(API_ELEVES_URL, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setEleves(response.data);
+        
+        // Extraction correcte des données
+        const elevesData = response.data?.data || response.data;
+        
+        if (Array.isArray(elevesData)) {
+          setEleves(elevesData);
+        } else {
+          console.error("Format de réponse inattendu:", elevesData);
+          setError("Format des données incorrect");
+          setEleves([]);
+        }
       } catch (error) {
         console.error("Erreur lors de la récupération des élèves :", error);
         setError("Erreur lors du chargement des élèves");
+        setEleves([]);
       }
     };
     fetchEleves();
@@ -58,17 +69,36 @@ const AjoutPaiement = () => {
 
   const handleAddPaiement = async () => {
     try {
+      // Validation des champs
+      if (!eleveId || !tranche || !montant || !anneeScolaire) {
+        setError("Tous les champs sont obligatoires");
+        return;
+      }
+
       const token = localStorage.getItem("token");
-      const newPaiement = { eleveId, tranche, montant, anneeScolaire };
-      await axios.post(`${API_URL}/ajout`, newPaiement, {
+      const newPaiement = { 
+        eleveId, 
+        tranche, 
+        montant: parseFloat(montant), 
+        anneeScolaire 
+      };
+      
+      const response = await axios.post(`${API_URL}/ajout`, newPaiement, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setSuccess(true);
-      clearForm();
-      setTimeout(() => setSuccess(false), 3000);
+
+      if (response.status === 201) {
+        setSuccess(true);
+        clearForm();
+        setTimeout(() => setSuccess(false), 3000);
+        setError("");
+      }
     } catch (err) {
-      setError("Erreur lors de l'ajout du paiement.");
-      console.error("Erreur lors de l'ajout du paiement :", err);
+      const errorMessage = err.response?.data?.message || 
+                         err.message || 
+                         "Erreur lors de l'ajout du paiement";
+      setError(errorMessage);
+      console.error("Erreur détaillée:", err.response?.data || err.message);
     }
   };
 
@@ -119,7 +149,7 @@ const AjoutPaiement = () => {
                 <MenuItem value="">
                   <em>Sélectionner un élève</em>
                 </MenuItem>
-                {eleves.map((eleve) => (
+                {Array.isArray(eleves) && eleves.map((eleve) => (
                   <MenuItem key={eleve._id} value={eleve._id}>
                     {eleve.nom} {eleve.prenom}
                   </MenuItem>
@@ -133,6 +163,7 @@ const AjoutPaiement = () => {
               onChange={(e) => setTranche(e.target.value)}
               fullWidth
               margin="normal"
+              required
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -149,6 +180,7 @@ const AjoutPaiement = () => {
               onChange={(e) => setMontant(e.target.value)}
               fullWidth
               margin="normal"
+              required
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -163,6 +195,7 @@ const AjoutPaiement = () => {
               <Select
                 value={anneeScolaire}
                 onChange={(e) => setAnneeScolaire(e.target.value)}
+                required
                 startAdornment={
                   <InputAdornment position="start">
                     <School />
