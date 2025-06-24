@@ -54,29 +54,30 @@ const CreerClasse = () => {
     const fetchData = async () => {
       try {
         setLoading(prev => ({ ...prev, enseignants: true, matieres: true }));
+        const token = localStorage.getItem('token');
         
         // Fetch matieres
         const matieresResponse = await axios.get('https://mes-sites.onrender.com/api/matieres', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         });
-        // Ensure matieres is an array
-        setMatieres(Array.isArray(matieresResponse.data) ? matieresResponse.data : []);
+        
+        // Gestion de la réponse des matières
+        const matieresData = matieresResponse.data?.data || matieresResponse.data || [];
+        setMatieres(Array.isArray(matieresData) ? matieresData : []);
 
-        // Fetch enseignants (assuming an endpoint exists)
-        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/listes', {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
+        // Fetch enseignants
+        const enseignantsResponse = await axios.get('https://mes-sites.onrender.com/api/enseignants/listes', {
+          headers: { Authorization: `Bearer ${token}` },
+          params: { populate: 'matiere' }
         });
-        // Ensure enseignants is an array
-        setEnseignants(Array.isArray(enseignantsResponse.data) ? enseignantsResponse.data : []);
+        
+        // Gestion de la réponse des enseignants
+        const enseignantsData = enseignantsResponse.data?.data || enseignantsResponse.data || [];
+        setEnseignants(Array.isArray(enseignantsData) ? enseignantsData : []);
 
       } catch (error) {
         console.error('Erreur lors du chargement des données:', error);
-        setErrorMessage('Erreur lors du chargement des données');
-        // Set empty arrays on error to prevent map errors
+        setErrorMessage(`Erreur lors du chargement des données: ${error.message}`);
         setMatieres([]);
         setEnseignants([]);
       } finally {
@@ -141,6 +142,7 @@ const CreerClasse = () => {
     if (!validateForm()) return;
 
     try {
+      const token = localStorage.getItem('token');
       const dataToSend = {
         nom: formData.nom,
         niveau: formData.niveau,
@@ -152,7 +154,7 @@ const CreerClasse = () => {
 
       const response = await axios.post('https://mes-sites.onrender.com/api/classes', dataToSend, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         }
       });
@@ -160,11 +162,16 @@ const CreerClasse = () => {
       if (response.status === 201) {
         setSuccess(true);
         setTimeout(() => {
-          navigate('/CreerClasse');
+          navigate('/classes');
         }, 2000);
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || 'Erreur lors de la création de la classe');
+      console.error('Erreur création classe:', error);
+      setErrorMessage(
+        error.response?.data?.message || 
+        error.message || 
+        'Erreur lors de la création de la classe'
+      );
     }
   };
 
@@ -266,9 +273,9 @@ const CreerClasse = () => {
                                 <CircularProgress size={24} />
                               </MenuItem>
                             ) : (
-                              Array.isArray(matieres) && matieres.length > 0 ? (
+                              matieres.length > 0 ? (
                                 matieres.map((mat) => (
-                                  <MenuItem key={mat._id} value={mat._id}>
+                                  <MenuItem key={mat._id || mat.id} value={mat._id || mat.id}>
                                     <Book sx={{ mr: 1 }} fontSize="small" />
                                     {mat.nom} (Coef: {mat.coefficient})
                                   </MenuItem>
@@ -301,9 +308,9 @@ const CreerClasse = () => {
                                 <CircularProgress size={24} />
                               </MenuItem>
                             ) : (
-                              Array.isArray(enseignants) && enseignants.length > 0 ? (
+                              enseignants.length > 0 ? (
                                 enseignants.map((ens) => (
-                                  <MenuItem key={ens._id} value={ens._id}>
+                                  <MenuItem key={ens._id || ens.id} value={ens._id || ens.id}>
                                     <Person sx={{ mr: 1 }} fontSize="small" />
                                     {ens.nom} {ens.prenom}
                                   </MenuItem>
