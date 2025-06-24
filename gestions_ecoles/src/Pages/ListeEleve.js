@@ -32,7 +32,7 @@ const ListeEleve = () => {
 const fetchEleves = async () => {  
   const token = localStorage.getItem('token');  
   try {  
-    const response = await axios.get('https://mes-sites.onrender.com/api/eleves?populate=classe', {  
+    const response = await axios.get("https://mes-sites.onrender.com/api/eleves", {  
       headers: {  
         Authorization: `Bearer ${token}`,  
       },  
